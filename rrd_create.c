@@ -24,7 +24,7 @@
 #include "php.h"
 #include "rrd_create.h"
 #include "php_rrd.h"
-#include "ext/standard/php_smart_str.h"
+#include "ext/standard/php_array.h"
 
 /* declare class entry */
 static zend_class_entry *ce_rrd_create;
@@ -224,62 +224,18 @@ PHP_METHOD(RRDCreator, addArchive)
 }
 /* }}} */
 
-/* {{{ rrd_create_add_string_arg
- Adds strings form php array into array (in C sense) of arguments for rrd_create
- call
- @param argv "C" array of arguments for rrd_create, is already allocated
-  with "counter param" filled elements
- @param arr php array of strings
- @param counter count of filled elements in array, is increased for each newly
-  added string
-*/
-static void rrd_create_add_string_arg(char **argv, zval *arr, uint *counter TSRMLS_DC)
-{
-    uint elements = zend_hash_num_elements(Z_ARRVAL_P(arr));
-    uint i;
-
-    zend_hash_internal_pointer_reset(Z_ARRVAL_P(arr));
-    for(i=0; i<elements; i++) {
-        char *str_key;
-        zval **item;
-        smart_str option = {0}; /* one argument option */
-
-        /* Data are always string, because they are added via setters, which
-         * forces using strings as arguments.
-         */
-        zend_hash_get_current_data(Z_ARRVAL_P(arr), (void**) &item);
-        smart_str_appendl(&option, Z_STRVAL_PP(item), Z_STRLEN_PP(item));
-        smart_str_0(&option);
-
-        argv[(*counter)++] = estrdup(option.c);
-        smart_str_free(&option);
-
-        if (i<elements) zend_hash_move_forward(Z_ARRVAL_P(arr));
-    }
-}
-/* }}} */
-
-/* {{{ proto array RRDCreator::save()
+/* {{{ proto bool RRDCreator::save()
  Saves new rrd database according to current properties.
  */
 PHP_METHOD(RRDCreator, save)
 {
     rrd_create_object *intern_obj = (rrd_create_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
-    /* array of arguments for rrd_create call */
-    char **argv;
-    uint argc,arg_counter,i;
-    uint archive_count = zend_hash_num_elements(Z_ARRVAL_P(intern_obj->zv_arr_archives));
-    uint data_source_count = zend_hash_num_elements(Z_ARRVAL_P(intern_obj->zv_arr_data_sources));
+    /* help structures for preparing arguments for rrd_create call */
+    zval *zv_create_argv;
+    rrd_args *create_argv;
 
-    /* 0-2 are defined below + start_time + step = 5 options */
-    argc = archive_count + data_source_count + 5;
-
-    argv = (char **) safe_emalloc(argc, sizeof(char *), 0);
-    /* "dummy" and "create" arguments are needed */
-    argv[0] = "dummy";
-    argv[1] = estrdup("create");
-    argv[2] = estrdup(intern_obj->file_path);
-    arg_counter = 3;
+    MAKE_STD_ZVAL(zv_create_argv);
+    array_init(zv_create_argv);
 
     if (intern_obj->start_time) {
         const char *prefix = "--start=";
@@ -288,11 +244,9 @@ PHP_METHOD(RRDCreator, save)
 
         strcpy(start_time_str, prefix);
         strcat(start_time_str, intern_obj->start_time);
+        add_next_index_string(zv_create_argv, start_time_str, 1);
 
-        argv[arg_counter++] = estrdup(start_time_str);
         efree(start_time_str);
-    } else {
-        argc--;
     }
 
     if (intern_obj->zv_step) {
@@ -304,26 +258,33 @@ PHP_METHOD(RRDCreator, save)
 
         strcpy(start_time_str, prefix);
         strcat(start_time_str, Z_STRVAL_P(intern_obj->zv_step));
+        add_next_index_string(zv_create_argv, start_time_str, 1);
 
-        argv[arg_counter++] = estrdup(start_time_str);
         /* back to long, doesn't needed, but we are consistent */
         convert_to_long(intern_obj->zv_step);
         efree(start_time_str);
-    } else {
-        argc--;
     }
 
-    /* add array of archive, data source strings into argument list for rrd_create */
-    rrd_create_add_string_arg(argv, intern_obj->zv_arr_data_sources, &arg_counter TSRMLS_CC);
-    rrd_create_add_string_arg(argv, intern_obj->zv_arr_archives, &arg_counter TSRMLS_CC);
+    /* add array of archive and data source strings into argument list */
+    php_array_merge(Z_ARRVAL_P(zv_create_argv), Z_ARRVAL_P(intern_obj->zv_arr_data_sources),
+        0 TSRMLS_CC);
+    php_array_merge(Z_ARRVAL_P(zv_create_argv), Z_ARRVAL_P(intern_obj->zv_arr_archives),
+        0 TSRMLS_CC);
+
+    create_argv = rrd_args_init_by_phparray("create", intern_obj->file_path,
+        zv_create_argv TSRMLS_CC);
+    if (!create_argv) {
+        zend_error(E_WARNING, "cannot allocate arguments options");
+        zval_dtor(zv_create_argv);
+        RETURN_FALSE;
+    }
 
     if (rrd_test_error()) rrd_clear_error();
 
     /* call rrd_create and test if fails */
-    if (rrd_create(argc-1, &argv[1]) == -1) {
-
-        for (i=1; i<argc; i++)
-            efree(argv[i]);
+    if (rrd_create(create_argv->count - 1, &create_argv->args[1]) == -1) {
+        zval_dtor(zv_create_argv);
+        rrd_args_free(create_argv);
 
         /* throw exception with rrd error string */
         zend_throw_exception(zend_exception_get_default(TSRMLS_C), rrd_get_error(), 0 TSRMLS_CC);
@@ -331,10 +292,9 @@ PHP_METHOD(RRDCreator, save)
         return;
     }
 
-    for (i=1; i<argc; i++)
-        efree(argv[i]);
-
-    return;
+    zval_dtor(zv_create_argv);
+    rrd_args_free(create_argv);
+    RETURN_TRUE;
 }
 /* }}} */
 
@@ -404,4 +364,3 @@ void rrd_create_minit(TSRMLS_DC)
     memcpy(&rrd_create_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     rrd_create_handlers.clone_obj = NULL;
 }
-
