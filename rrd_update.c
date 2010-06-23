@@ -112,6 +112,7 @@ PHP_METHOD(RRDUpdater, update)
     rrd_update_object *intern_obj;
     zval *zv_values_array;
 
+    /* help structures for preparing arguments for rrd_create call */
     zval *zv_update_argv;
     rrd_args *update_argv;
 
