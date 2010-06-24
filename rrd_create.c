@@ -303,9 +303,9 @@ PHP_METHOD(RRDCreator, save)
  */
 PHP_FUNCTION(rrd_create)
 {
-	char *filename;
-	int filename_length;
-	zval *zv_arr_options;
+    char *filename;
+    int filename_length;
+    zval *zv_arr_options;
     rrd_args *argv;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa", &filename,
@@ -313,7 +313,7 @@ PHP_FUNCTION(rrd_create)
         return;
     }
 
-	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+    if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
 
     argv = rrd_args_init_by_phparray("create", filename, zv_arr_options TSRMLS_CC);
     if (!argv) {
@@ -321,7 +321,7 @@ PHP_FUNCTION(rrd_create)
         RETURN_FALSE;
     }
 
-	if (rrd_test_error()) rrd_clear_error();
+    if (rrd_test_error()) rrd_clear_error();
 
     if (rrd_create(argv->count - 1, &argv->args[1]) == -1 ) {
         RETVAL_FALSE;
@@ -335,13 +335,13 @@ PHP_FUNCTION(rrd_create)
 
 /* arguments */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, path)
-	ZEND_ARG_INFO(0, startTime)
-	ZEND_ARG_INFO(0, step)
+    ZEND_ARG_INFO(0, path)
+    ZEND_ARG_INFO(0, startTime)
+    ZEND_ARG_INFO(0, step)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_description, 0, 0, 1)
-	ZEND_ARG_INFO(0, description)
+    ZEND_ARG_INFO(0, description)
 ZEND_END_ARG_INFO()
 
 /* class method table */
