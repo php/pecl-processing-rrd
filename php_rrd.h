@@ -27,12 +27,12 @@ extern zend_module_entry rrd_module_entry;
 #endif
 
 typedef struct _rrd_args {
-    int count;
-    char **args;
+	int count;
+	char **args;
 } rrd_args;
 
 rrd_args *rrd_args_init_by_phparray(const char *command_name, const char *filename,
-    const zval *options TSRMLS_DC);
+	const zval *options TSRMLS_DC);
 void rrd_args_free(rrd_args *args);
 
 #endif  /* PHP_RRD_H */
