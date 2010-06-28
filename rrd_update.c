@@ -112,7 +112,7 @@ PHP_METHOD(RRDUpdater, update)
 	rrd_update_object *intern_obj;
 	zval *zv_values_array;
 
-	/* help structures for preparing arguments for rrd_create call */
+	/* help structures for preparing arguments for rrd_update call */
 	zval *zv_update_argv;
 	rrd_args *update_argv;
 
@@ -210,8 +210,8 @@ PHP_METHOD(RRDUpdater, update)
 		return;
 	}
 
-	/* parameter isn't presented and we alloced default one, so we neeed to
-	 * freed
+	/* parameter isn't presented and we alloced default one, so we need to
+	 * free this one
 	 */
 	if (time_str_length == 0) efree(time);
 	zval_dtor(zv_update_argv);
