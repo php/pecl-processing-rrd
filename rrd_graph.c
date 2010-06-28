@@ -22,6 +22,7 @@
 
 #include <rrd.h>
 #include "php.h"
+#include "php_rrd.h"
 #include "rrd_graph.h"
 #include "ext/standard/php_smart_str.h"
 
@@ -138,10 +139,11 @@ Saves graph according to current properties.
 PHP_METHOD(RRDGraph, save)
 {
 	rrd_graph_object *intern_obj = (rrd_graph_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
-
+	/* returned values if rrd_graph doesn't fail */
 	int xsize, ysize;
 	double ymin,ymax;
 	char **calcpr;
+	zval zv_calcpr_array;
 	/* array of arguments for rrd_graph call */
 	char **argv;
 	unsigned int argc,i;
@@ -204,33 +206,103 @@ PHP_METHOD(RRDGraph, save)
 		return;
 	}
 
-	/* rrd_graph call was OK, so copy rrd_graph return values which are stored
-	 in calcpr to php array
-	*/
-	zval zv_calcpr_array;
-
-	INIT_PZVAL(&zv_calcpr_array)
-	array_init(&zv_calcpr_array);
-	if (calcpr) {
-		for (i=0; calcpr[i]; i++) {
-			add_next_index_string(&zv_calcpr_array, calcpr[i], 1);
-			free(calcpr[i]);
-		}
-		free(calcpr);
-	}
-
-	/* made return value */
+	/* making return array */
 	array_init(return_value);
 	add_assoc_long(return_value, "xsize", xsize);
 	add_assoc_long(return_value, "ysize", ysize);
-	/* add calcpr return values under "calcpr" key */
-	zend_hash_update(return_value->value.ht, "calcpr", sizeof("calcpr"),
-	(void *)&zv_calcpr_array, sizeof(zval *), NULL);
+
+	/* add calcpr return values under "calcpr" key
+	 *
+	 * if calcpr isn't presented add PHP NULL value
+	 */
+	if (!calcpr) {
+		add_assoc_null(return_value, "calcpr");
+	} else {
+		/* calcpr is presented, hence create array for it, and add it to return array */
+		INIT_PZVAL(&zv_calcpr_array)
+		array_init(&zv_calcpr_array);
+		if (calcpr) {
+			for (i=0; calcpr[i]; i++) {
+				add_next_index_string(&zv_calcpr_array, calcpr[i], 1);
+				free(calcpr[i]);
+			}
+			free(calcpr);
+		}
+		add_assoc_zval(return_value, "calcpr", &zv_calcpr_array);
+	}
 
 	for (i=1; i<argc; i++)
-	   efree(argv[i]);
+		efree(argv[i]);
+}
+/* }}} */
 
-	return;
+/* {{{ proto array rrd_graph(string file, array options)
+	Ceates a graph based on options passed via an array.
+*/
+PHP_FUNCTION(rrd_graph)
+{
+	char *filename;
+	int filename_length;
+	zval *zv_arr_options;
+	rrd_args *argv;
+	/* returned values if rrd_graph doesn't fail */
+	int xsize, ysize;
+	double ymin,ymax;
+	char **calcpr;
+	zval *zv_calcpr_array;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa", &filename,
+		&filename_length, &zv_arr_options) == FAILURE) {
+		return;
+	}
+
+	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+
+	argv = rrd_args_init_by_phparray("graph", filename, zv_arr_options TSRMLS_CC);
+	if (!argv) {
+		zend_error(E_WARNING, "cannot allocate arguments options");
+		RETURN_FALSE;
+	}
+
+	if (rrd_test_error()) rrd_clear_error();
+
+	/* call rrd graph and test if fails */
+	if (rrd_graph(argv->count - 1, &argv->args[1], &calcpr, &xsize, &ysize,
+		NULL, &ymin, &ymax) == -1) {
+
+		rrd_args_free(argv);
+		RETURN_FALSE;
+	}
+
+	/* making return array*/
+	array_init(return_value);
+	add_assoc_long(return_value, "xsize", xsize);
+	add_assoc_long(return_value, "ysize", ysize);
+
+	/* add calcpr return values under "calcpr" key
+	 *
+	 * if calcpr isn't presented add PHP NULL value
+	 */
+	if (!calcpr) {
+		add_assoc_null(return_value, "calcpr");
+	} else {
+		/* calcpr is presented,	hence create array for it, and add it to return	array */
+		MAKE_STD_ZVAL(zv_calcpr_array)
+		array_init(zv_calcpr_array);
+		if (calcpr)	{
+			uint i;
+			for	(i=0; calcpr[i]; i++) {
+				add_next_index_string(zv_calcpr_array, calcpr[i], 1);
+				free(calcpr[i]);
+			}
+			free(calcpr);
+		}
+		add_assoc_zval(return_value, "calcpr", zv_calcpr_array);
+	}
+
+	rrd_args_free(argv);
+
+	RETURN_TRUE;
 }
 /* }}} */
 

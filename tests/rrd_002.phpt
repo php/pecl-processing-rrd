@@ -10,7 +10,7 @@ $command = "rrdtool create $rrdFile "
  . "DS:speed:COUNTER:600:U:U "
  . "RRA:AVERAGE:0.5:1:24 "
  . "RRA:AVERAGE:0.5:6:10";
-echo "creting test.rrd via exec\n";
+echo "creting $rrdFile via exec\n";
 exec($command);
 
 $updateCommand = array(
@@ -20,7 +20,7 @@ $updateCommand = array(
  "rrdtool update $rrdFile 920807400:12405 920807700:12411 920808000:12415",
  "rrdtool update $rrdFile 920808300:12420 920808600:12422 920808900:12423"
 );
-echo "updating test.rrd via exec\n";
+echo "updating $rrdFile via exec\n";
 foreach($updateCommand as $command) {
 	exec($command);
 }
@@ -33,10 +33,10 @@ $command = "rrdtool graph $origPngFile "
  . "CDEF:realspeed=myspeed,1000,* "
  . "LINE2:realspeed#FF0000";
 
-echo "exporting speed-orig.png via exec\n";
+echo "exporting $origPngFile via exec\n";
 exec($command);
 
-$outputPngFile = dirname(__FILE__) . "/speed.png";
+$outputPngFile = dirname(__FILE__) . "/rrdGraph-speed.png";
 $graphObj = new RRDGraph($outputPngFile);
 $graphObj->setOptions(array(
 	"--start" => "920804400",
@@ -49,9 +49,9 @@ $graphObj->setOptions(array(
 var_dump($graphObj->save());
 ?>
 --EXPECTF--
-creting test.rrd via exec
-updating test.rrd via exec
-exporting speed-orig.png via exec
+creting %s via exec
+updating %s via exec
+exporting %s via exec
 array(3) {
   ["xsize"]=>
   int(497)
