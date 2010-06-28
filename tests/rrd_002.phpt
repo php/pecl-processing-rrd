@@ -40,7 +40,7 @@ $outputPngFile = dirname(__FILE__) . "/rrdGraph-speed.png";
 $graphObj = new RRDGraph($outputPngFile);
 $graphObj->setOptions(array(
 	"--start" => "920804400",
-	"--end" => "920808000",
+	"--end" => 920808000,
 	"--vertical-label" => "m/s",
 	"DEF:myspeed=$rrdFile:speed:AVERAGE",
 	"CDEF:realspeed=myspeed,1000,*",
