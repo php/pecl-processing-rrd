@@ -36,7 +36,6 @@ of having dedicated creating/cloning/destruction functions
 */
 typedef struct _rrd_update_object {
 	zend_object std;
-
 	/** path to newly created rrd file */
 	char *file_path;
 } rrd_update_object;
@@ -156,7 +155,7 @@ PHP_METHOD(RRDUpdater, update)
 	}
 
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(zv_values_array));
-	for(i=0; i<ds_count; i++) {
+	for (i=0; i<ds_count; i++) {
 		char *ds_name;
 		zval **ds_val;
 

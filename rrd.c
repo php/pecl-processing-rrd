@@ -101,7 +101,7 @@ rrd_args *rrd_args_init_by_phparray(const char *command_name, const char *filena
 	if (strlen(filename)) result->args[args_counter++] = estrdup(filename);
 
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(options));
-	for(i=0; i<option_count; i++) {
+	for (i=0; i<option_count; i++) {
 		zval **item;
 		smart_str option = {0}; /* one argument option */
 
