@@ -306,7 +306,7 @@ PHP_FUNCTION(rrd_graph)
 	if (!calcpr) {
 		add_assoc_null(return_value, "calcpr");
 	} else {
-		/* calcpr is presented,	hence create array for it, and add it to return	array */
+		/* calcpr is presented, hence create array for it, and add it to return array */
 		zval *zv_calcpr_array;
 		MAKE_STD_ZVAL(zv_calcpr_array)
 		array_init(zv_calcpr_array);
