@@ -27,11 +27,25 @@
 #include "rrd_create.h"
 #include "rrd_update.h"
 
+/* {{{ proto string rrd_error()
+Get the error message set by the last rrd tool function call, this function
+clear error buffer also.
+*/
+PHP_FUNCTION(rrd_error)
+{
+	if (rrd_test_error()) {
+		RETVAL_STRING(rrd_get_error(), 1);
+		rrd_clear_error();
+	}
+}
+/* }}} */
+
 /* {{{ */
 static function_entry rrd_functions[] = {
 	PHP_FE(rrd_update, arginfo_rrd_update)
 	PHP_FE(rrd_create, arginfo_rrd_create)
 	PHP_FE(rrd_graph, arginfo_rrd_graph)
+	PHP_FE(rrd_error, NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
