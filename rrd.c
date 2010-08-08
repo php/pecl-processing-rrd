@@ -145,10 +145,38 @@ PHP_FUNCTION(rrd_fetch)
 }
 /* }}} */
 
+/* {{{ proto int rrd_first(string file [, int rraindex = 0])
+	Gets first update time of an RRD file
+*/
+PHP_FUNCTION(rrd_first)
+{
+	char *filename;
+	int filename_length;
+	long rraindex = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename,
+		&filename_length, &rraindex) == FAILURE) {
+		return;
+	}
+
+	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+
+	if (rrd_test_error()) rrd_clear_error();
+
+	RETURN_LONG(rrd_first_r(filename, rraindex));
+}
+/* }}} */
+
+
 /* {{{ arguments */
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_fetch, 0)
 	ZEND_ARG_INFO(0, file)
 	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_rrd_first, 0, 0, 1)
+	ZEND_ARG_INFO(0, file)
+	ZEND_ARG_INFO(0, raaindex)
 ZEND_END_ARG_INFO()
 /* }}} */
 
@@ -159,6 +187,7 @@ static function_entry rrd_functions[] = {
 	PHP_FE(rrd_graph, arginfo_rrd_graph)
 	PHP_FE(rrd_error, NULL)
 	PHP_FE(rrd_fetch, arginfo_rrd_fetch)
+	PHP_FE(rrd_first, arginfo_rrd_first)
 	{NULL, NULL, NULL}
 };
 /* }}} */
