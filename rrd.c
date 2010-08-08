@@ -22,10 +22,13 @@
 
 #include "php.h"
 #include "ext/standard/php_smart_str.h"
+
 #include "php_rrd.h"
 #include "rrd_graph.h"
 #include "rrd_create.h"
 #include "rrd_update.h"
+
+#include <rrd.h>
 
 /* {{{ proto string rrd_error()
 Get the error message set by the last rrd tool function call, this function
@@ -40,12 +43,122 @@ PHP_FUNCTION(rrd_error)
 }
 /* }}} */
 
+/* {{{ proto array rrd_fetch(string file, array options)
+Fetch data from RRD in requested resolution.
+*/
+PHP_FUNCTION(rrd_fetch)
+{
+	char *filename;
+	int filename_length;
+	zval *zv_arr_options;
+	rrd_args *argv;
+	/* returned values if rrd_fetch doesn't fail */
+	time_t start, end;
+	ulong step,
+	ds_cnt; /* count of data sources */
+	char **ds_namv; /* list of data source names */
+	rrd_value_t *ds_data; /* all data from all sources */
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa", &filename,
+		&filename_length, &zv_arr_options) == FAILURE) {
+		return;
+	}
+
+	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+
+	argv = rrd_args_init_by_phparray("fetch", filename, zv_arr_options TSRMLS_CC);
+	if (!argv) {
+		zend_error(E_WARNING, "cannot allocate arguments options");
+		RETURN_FALSE;
+	}
+
+	if (rrd_test_error()) rrd_clear_error();
+
+	/* call rrd_fetch and test if fails */
+	if (rrd_fetch(argv->count-1, &argv->args[1], &start, &end, &step, &ds_cnt,
+		&ds_namv, &ds_data) == -1 ) {
+
+		rrd_args_free(argv);
+		RETURN_FALSE;
+	}
+
+	/* making return array*/
+	array_init(return_value);
+	add_assoc_long(return_value, "start", start);
+	add_assoc_long(return_value, "end", end);
+	add_assoc_long(return_value, "step", step);
+	add_assoc_long(return_value, "ds_cnt", ds_cnt);
+
+	/* add "ds_namv" return values to return array under "ds_namv" key
+	 * if no data sources are presented add PHP NULL value
+	 */
+	if (!ds_namv || !ds_cnt) {
+		add_assoc_null(return_value, "ds_namv");
+	} else {
+		/* count of intems in ds_namv array, total count is stored in
+		 * ds_cnt value
+		 */
+		uint i;
+		/* "ds_namv" is presented, hence create array for it, and add it to
+		 * return array
+		 */
+		zval *zv_ds_namv_array;
+		MAKE_STD_ZVAL(zv_ds_namv_array)
+		array_init(zv_ds_namv_array);
+		for	(i=0; i < ds_cnt; i++) {
+			add_next_index_string(zv_ds_namv_array, ds_namv[i], 1);
+			free(ds_namv[i]);
+		}
+		free(ds_namv);
+		add_assoc_zval(return_value, "ds_navm", zv_ds_namv_array);
+	}
+
+	/* Add all data from all sources as array under "data" key in return array.
+	 * If no data are presented add PHP NULL value
+	 */
+	if (!ds_data) {
+		add_assoc_null(return_value, "data");
+	} else {
+		rrd_value_t *datap = ds_data;
+		uint timestamp, ds_counter;
+		zval *zv_data_array;
+
+		MAKE_STD_ZVAL(zv_data_array)
+		array_init(zv_data_array);
+		for (timestamp = start + step; timestamp <= end; timestamp += step) {
+			for (ds_counter = 0; ds_counter < ds_cnt; ds_counter++) {
+				zval *zv_timestamp;
+				MAKE_STD_ZVAL(zv_timestamp);
+				ZVAL_LONG(zv_timestamp, timestamp);
+				convert_to_string(zv_timestamp);
+
+				add_assoc_double(zv_data_array, Z_STRVAL_P(zv_timestamp), *(datap++));
+				zval_dtor(zv_timestamp);
+			}
+		}
+		free(ds_data);
+
+		add_assoc_zval(return_value, "data", zv_data_array);
+	}
+
+	rrd_args_free(argv);
+}
+/* }}} */
+
+/* {{{ arguments */
+ZEND_BEGIN_ARG_INFO(arginfo_rrd_fetch, 0)
+	ZEND_ARG_INFO(0, file)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+/* }}} */
+
 /* {{{ */
 static function_entry rrd_functions[] = {
 	PHP_FE(rrd_update, arginfo_rrd_update)
 	PHP_FE(rrd_create, arginfo_rrd_create)
 	PHP_FE(rrd_graph, arginfo_rrd_graph)
 	PHP_FE(rrd_error, NULL)
+	PHP_FE(rrd_fetch, arginfo_rrd_fetch)
 	{NULL, NULL, NULL}
 };
 /* }}} */
