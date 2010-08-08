@@ -37,16 +37,14 @@ echo "exporting $origPngFile via exec\n";
 exec($command);
 
 $outputPngFile = dirname(__FILE__) . "/rrd_graph_speed.png";
-$graphObj = new RRDGraph($outputPngFile);
-$graphObj->setOptions(array(
-	"--start" => "920804400",
-	"--end" => "920808000",
-	"--vertical-label" => "m/s",
+var_dump(rrd_graph($outputPngFile, array(
+	"--start", "920804400",
+	"--end", "920808000",
+	"--vertical-label", "m/s",
 	"DEF:myspeed=$rrdFile:speed:AVERAGE",
 	"CDEF:realspeed=myspeed,1000,*",
 	"LINE2:realspeed#FF0000"
-));
-var_dump($graphObj->save());
+)));
 ?>
 --EXPECTF--
 creting %s via exec

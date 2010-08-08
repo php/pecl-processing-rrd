@@ -322,8 +322,6 @@ PHP_FUNCTION(rrd_graph)
 	}
 
 	rrd_args_free(argv);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
