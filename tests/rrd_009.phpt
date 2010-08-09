@@ -10,4 +10,4 @@ var_dump(rrd_error());
 ?>
 --EXPECTF--
 string(31) "can't parse argument 'badParam'"
-NULL
+bool(false)

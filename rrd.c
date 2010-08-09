@@ -36,10 +36,10 @@ clear error buffer also.
 */
 PHP_FUNCTION(rrd_error)
 {
-	if (rrd_test_error()) {
-		RETVAL_STRING(rrd_get_error(), 1);
-		rrd_clear_error();
-	}
+	if (!rrd_test_error()) RETURN_FALSE;
+
+	RETVAL_STRING(rrd_get_error(), 1);
+	rrd_clear_error();
 }
 /* }}} */
 
