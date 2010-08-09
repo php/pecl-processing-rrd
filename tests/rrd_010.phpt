@@ -34,7 +34,6 @@ var_dump(rrd_fetch($rrdFile, array(
 --EXPECTF--
 creting %s via exec
 updating %s via exec
-exporting %s via exec
 array(6) {
   ["start"]=>
   int(920804400)
