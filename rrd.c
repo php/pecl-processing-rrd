@@ -155,7 +155,7 @@ PHP_FUNCTION(rrd_first)
 	int filename_length;
 	long rraindex = 0;
 	/* return value from rrd_first_r call */
-	long rrd_first_return_val;
+	time_t rrd_first_return_val;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename,
 		&filename_length, &rraindex) == FAILURE) {
@@ -241,6 +241,32 @@ PHP_FUNCTION(rrd_info)
 }
 /* }}} */
 
+/* {{{ proto int rrd_last(string file)
+	Gets last update time of an RRD file
+*/
+PHP_FUNCTION(rrd_last)
+{
+	char *filename;
+	int filename_length;
+	/* return value from rrd_first_r call */
+	time_t rrd_last_return_val;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename,
+		&filename_length) == FAILURE) {
+		return;
+	}
+
+	if (rrd_test_error()) rrd_clear_error();
+
+	/* call rrd_last and test if fails */
+	rrd_last_return_val = rrd_last_r(filename);
+	if (rrd_last_return_val == -1) {
+		RETURN_FALSE;
+	}
+	RETURN_LONG(rrd_last_return_val);
+}
+/* }}} */
+
 /* {{{ arguments */
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_fetch, 0)
 	ZEND_ARG_INFO(0, file)
@@ -255,6 +281,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_info, 0)
 	ZEND_ARG_INFO(0, file)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_rrd_last, 0)
+	ZEND_ARG_INFO(0, file)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ */
@@ -266,6 +296,7 @@ static function_entry rrd_functions[] = {
 	PHP_FE(rrd_fetch, arginfo_rrd_fetch)
 	PHP_FE(rrd_first, arginfo_rrd_first)
 	PHP_FE(rrd_info, arginfo_rrd_info)
+	PHP_FE(rrd_last, arginfo_rrd_last)
 	{NULL, NULL, NULL}
 };
 /* }}} */
