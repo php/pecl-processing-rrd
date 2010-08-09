@@ -180,6 +180,66 @@ PHP_FUNCTION(rrd_first)
 }
 /* }}} */
 
+/* {{{ proto array rrd_info(string file)
+	Gets the header information from an RRD.
+*/
+PHP_FUNCTION(rrd_info)
+{
+	char *filename;
+	int filename_length;
+	/* list of arguments for rrd_info call, it's more efficient then u
+	 * usage of rrd_args, because there isn't array of arguments in parameters
+	 */
+	char *argv[3];
+	/* return value from rrd_info_r() */
+	rrd_info_t *rrd_info_data, *data_p;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename,
+		&filename_length) == FAILURE) {
+		return;
+	}
+
+	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+
+	argv[0] = "dummy";
+	argv[1] = estrdup("info");
+	argv[2] = estrndup(filename, filename_length);
+
+	rrd_info_data = rrd_info(2, &argv[1]);
+
+	efree(argv[2]); efree(argv[1]);
+
+	if (!rrd_info_data) RETURN_FALSE;
+
+	/* making return array*/
+	array_init(return_value);
+
+	data_p = rrd_info_data;
+	while (data_p) {
+		switch (data_p->type) {
+		case RD_I_VAL:
+			add_assoc_double(return_value, data_p->key, data_p->value.u_val);
+			break;
+		case RD_I_CNT:
+			add_assoc_long(return_value, data_p->key, data_p->value.u_cnt);
+			break;
+		case RD_I_INT:
+			add_assoc_long(return_value, data_p->key, data_p->value.u_int);
+			break;
+		case RD_I_STR:
+			add_assoc_string(return_value, data_p->key, data_p->value.u_str, 1);
+			break;
+		case RD_I_BLO:
+			add_assoc_stringl(return_value, data_p->key, data_p->value.u_blo.ptr,
+				 data_p->value.u_blo.size, 1);
+			break;
+		}
+		data_p = data_p->next;
+	}
+
+	rrd_info_free(rrd_info_data);
+}
+/* }}} */
 
 /* {{{ arguments */
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_fetch, 0)
@@ -191,6 +251,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_rrd_first, 0, 0, 1)
 	ZEND_ARG_INFO(0, file)
 	ZEND_ARG_INFO(0, raaindex)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_rrd_info, 0)
+	ZEND_ARG_INFO(0, file)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ */
@@ -201,6 +265,7 @@ static function_entry rrd_functions[] = {
 	PHP_FE(rrd_error, NULL)
 	PHP_FE(rrd_fetch, arginfo_rrd_fetch)
 	PHP_FE(rrd_first, arginfo_rrd_first)
+	PHP_FE(rrd_info, arginfo_rrd_info)
 	{NULL, NULL, NULL}
 };
 /* }}} */
