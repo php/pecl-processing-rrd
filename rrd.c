@@ -127,6 +127,7 @@ PHP_FUNCTION(rrd_fetch)
 		array_init(zv_data_array);
 		for (timestamp = start + step; timestamp <= end; timestamp += step) {
 			for (ds_counter = 0; ds_counter < ds_cnt; ds_counter++) {
+				/* value for key (timestamp) in data array */
 				zval *zv_timestamp;
 				MAKE_STD_ZVAL(zv_timestamp);
 				ZVAL_LONG(zv_timestamp, timestamp);
@@ -153,17 +154,29 @@ PHP_FUNCTION(rrd_first)
 	char *filename;
 	int filename_length;
 	long rraindex = 0;
+	/* return value from rrd_first_r call */
+	long rrd_first_return_val;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename,
 		&filename_length, &rraindex) == FAILURE) {
 		return;
 	}
 
+	if (rraindex < 0) {
+		rrd_set_error("invalid rraindex number, rraindex must be >= 0");
+		RETURN_FALSE;
+	}
+
 	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
 
 	if (rrd_test_error()) rrd_clear_error();
 
-	RETURN_LONG(rrd_first_r(filename, rraindex));
+	/* call rrd_first and test if fails */
+	rrd_first_return_val = rrd_first_r(filename, rraindex);
+	if (rrd_first_return_val == -1) {
+		RETURN_FALSE;
+	}
+	RETURN_LONG(rrd_first_return_val);
 }
 /* }}} */
 
