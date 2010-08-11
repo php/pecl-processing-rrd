@@ -36,6 +36,10 @@ clear error buffer also.
 */
 PHP_FUNCTION(rrd_error)
 {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+		return;
+	}
+
 	if (!rrd_test_error()) RETURN_FALSE;
 
 	RETVAL_STRING(rrd_get_error(), 1);
