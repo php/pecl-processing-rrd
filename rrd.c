@@ -260,6 +260,8 @@ PHP_FUNCTION(rrd_last)
 		return;
 	}
 
+	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_last and test if fails */
@@ -270,6 +272,91 @@ PHP_FUNCTION(rrd_last)
 	RETURN_LONG(rrd_last_return_val);
 }
 /* }}} */
+
+/* {{{ proto int rrd_lastupdate(string file)
+	Gets last update details of an RRD file */
+PHP_FUNCTION(rrd_lastupdate)
+{
+	char *filename;
+	int filename_length;
+	/* list of arguments for rrd_info call, it's more efficient then u
+	 * usage of rrd_args, because there isn't array of arguments in parameters
+	 */
+	char *argv[3];
+	/* return values from rrd_lastupdate_r function */
+	time_t last_update;
+	unsigned long ds_cnt;
+	char **ds_namv;
+	char **last_ds;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename,
+		&filename_length) == FAILURE) {
+		return;
+	}
+
+	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+
+	argv[0] = "dummy";
+	argv[1] = estrdup("lastupdate");
+	argv[2] = estrndup(filename, filename_length);
+
+	if (rrd_test_error()) rrd_clear_error();
+
+	if (rrd_lastupdate(2, &argv[1], &last_update, &ds_cnt, &ds_namv,
+		&last_ds) == -1) {
+		efree(argv[2]); efree(argv[1]);
+		RETURN_FALSE;
+	}
+
+	efree(argv[2]); efree(argv[1]);
+
+	/* making return array*/
+	array_init(return_value);
+	add_assoc_long(return_value, "last_update", last_update);
+	add_assoc_long(return_value, "ds_cnt", ds_cnt);
+
+	/* "ds_navm" return array or null, if no available */
+	if (!ds_namv || !ds_cnt) {
+		add_assoc_null(return_value, "ds_namv");
+	} else {
+		uint i;
+		zval *zv_ds_namv_array;
+		MAKE_STD_ZVAL(zv_ds_namv_array);
+		array_init(zv_ds_namv_array);
+
+		for (i = 0; i < ds_cnt; i++) {
+			add_next_index_string(zv_ds_namv_array, ds_namv[i], 1);
+			free(ds_namv[i]);
+		}
+		free(ds_namv);
+		add_assoc_zval(return_value, "ds_navm", zv_ds_namv_array);
+	}
+
+	/* "data" return array or null, if no available */
+	if (!last_ds || !ds_cnt) {
+		add_assoc_null(return_value, "data");
+	} else {
+		uint i;
+		zval *zv_data_array;
+		MAKE_STD_ZVAL(zv_data_array);
+		array_init(zv_data_array);
+
+		for (i = 0; i < ds_cnt; i++) {
+			/* last_update is key in data array */
+			zval *zv_timestamp;
+			MAKE_STD_ZVAL(zv_timestamp);
+			ZVAL_LONG(zv_timestamp, last_update);
+			convert_to_string(zv_timestamp);
+
+			add_assoc_string(zv_data_array, Z_STRVAL_P(zv_timestamp), last_ds[i], 1);
+
+			free(last_ds[i]);
+			zval_dtor(zv_timestamp);
+		}
+		free(last_ds);
+		add_assoc_zval(return_value, "data", zv_data_array);
+	}
+}
 
 /* {{{ arguments */
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_fetch, 0)
@@ -289,6 +376,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_last, 0)
 	ZEND_ARG_INFO(0, file)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_rrd_lastupdate, 0)
+	ZEND_ARG_INFO(0, file)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ */
@@ -301,6 +392,7 @@ static function_entry rrd_functions[] = {
 	PHP_FE(rrd_first, arginfo_rrd_first)
 	PHP_FE(rrd_info, arginfo_rrd_info)
 	PHP_FE(rrd_last, arginfo_rrd_last)
+	PHP_FE(rrd_lastupdate, arginfo_rrd_lastupdate)
 	{NULL, NULL, NULL}
 };
 /* }}} */
