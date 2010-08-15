@@ -409,6 +409,45 @@ PHP_FUNCTION(rrd_restore)
 }
 /* }}} */
 
+/* {{{ proto int rrd_tune(string file, array options)
+	Tune an RRD file with the options passed (passed via array) */
+PHP_FUNCTION(rrd_tune)
+{
+	char *filename;
+	int filename_length;
+	zval *zv_arr_options;
+	rrd_args *argv;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa", &filename,
+		&filename_length, &zv_arr_options) == FAILURE) {
+		return;
+	}
+
+	if (!zend_hash_num_elements(Z_ARRVAL_P(zv_arr_options))) {
+		zend_error(E_WARNING, "options array mustn't be empty");
+		RETURN_FALSE;
+	}
+
+	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+
+	argv = rrd_args_init_by_phparray("tune", filename, zv_arr_options TSRMLS_CC);
+	if (!argv) {
+		zend_error(E_WARNING, "cannot allocate arguments options");
+		RETURN_FALSE;
+	}
+
+	if (rrd_test_error()) rrd_clear_error();
+
+	/* call rrd_tune and test if fails */
+	if (rrd_tune(argv->count-1, &argv->args[1]) == -1 ) {
+		RETVAL_FALSE;
+	} else {
+		RETVAL_TRUE;
+	}
+	rrd_args_free(argv);
+}
+/* }}} */
+
 /* {{{ arguments */
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_fetch, 0)
 	ZEND_ARG_INFO(0, file)
@@ -438,6 +477,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_rrd_restore, 0, 0, 2)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_rrd_tune, 0)
+	ZEND_ARG_INFO(0, file)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ */
@@ -452,6 +495,7 @@ static function_entry rrd_functions[] = {
 	PHP_FE(rrd_last, arginfo_rrd_last)
 	PHP_FE(rrd_lastupdate, arginfo_rrd_lastupdate)
 	PHP_FE(rrd_restore, arginfo_rrd_restore)
+	PHP_FE(rrd_tune, arginfo_rrd_tune)
 	{NULL, NULL, NULL}
 };
 /* }}} */
