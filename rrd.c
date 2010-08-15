@@ -22,6 +22,7 @@
 
 #include "php.h"
 #include "ext/standard/php_smart_str.h"
+#include "ext/standard/php_array.h"
 
 #include "php_rrd.h"
 #include "rrd_graph.h"
@@ -358,6 +359,56 @@ PHP_FUNCTION(rrd_lastupdate)
 	}
 }
 
+/* {{{ proto array rrd_restore(string xmlFile, string rrdFile [, array options])
+	Restores an RRD file from a XML dump */
+PHP_FUNCTION(rrd_restore)
+{
+	char *xml_filename, *rrd_filename;
+	int xml_filename_length, rrd_filename_length;
+	zval *zv_arr_options = NULL;
+	/* this is merge of options and rrd_filename. This is needed because
+	 * rrd_args_init_by_phparray allows only one filename as argument, so
+	 * rrd_filename mugst be part of array of arguments
+	 */
+	zval *zv_options;
+	rrd_args *argv;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|a", &xml_filename,
+		&xml_filename_length, &rrd_filename, &rrd_filename_length,
+		&zv_arr_options) == FAILURE) {
+		return;
+	}
+
+	if (php_check_open_basedir(xml_filename TSRMLS_CC)) RETURN_FALSE;
+	if (php_check_open_basedir(rrd_filename TSRMLS_CC)) RETURN_FALSE;
+
+	/* zv_options = merge rrd_filename and zv_arr_options content */
+	MAKE_STD_ZVAL(zv_options);
+	array_init(zv_options);
+	add_next_index_string(zv_options, rrd_filename, 1);
+	if (zv_arr_options && Z_TYPE_P(zv_arr_options) == IS_ARRAY) {
+		php_array_merge(Z_ARRVAL_P(zv_options), Z_ARRVAL_P(zv_arr_options), 0 TSRMLS_CC);
+	}
+
+	argv = rrd_args_init_by_phparray("restore", xml_filename, zv_options TSRMLS_CC);
+	if (!argv) {
+		zend_error(E_WARNING, "cannot allocate arguments options");
+		RETURN_FALSE;
+	}
+
+	if (rrd_test_error()) rrd_clear_error();
+
+	/* call rrd_ restore and test if fails */
+	if (rrd_restore(argv->count-1, &argv->args[1]) == -1) {
+		RETVAL_FALSE;
+	} else {
+		RETVAL_TRUE;
+	}
+	zval_dtor(zv_options);
+	rrd_args_free(argv);
+}
+/* }}} */
+
 /* {{{ arguments */
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_fetch, 0)
 	ZEND_ARG_INFO(0, file)
@@ -380,6 +431,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_lastupdate, 0)
 	ZEND_ARG_INFO(0, file)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_rrd_restore, 0, 0, 2)
+	ZEND_ARG_INFO(0, xml_file)
+	ZEND_ARG_INFO(0, rrd_file)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
 /* }}} */
 
 /* {{{ */
@@ -393,6 +451,7 @@ static function_entry rrd_functions[] = {
 	PHP_FE(rrd_info, arginfo_rrd_info)
 	PHP_FE(rrd_last, arginfo_rrd_last)
 	PHP_FE(rrd_lastupdate, arginfo_rrd_lastupdate)
+	PHP_FE(rrd_restore, arginfo_rrd_restore)
 	{NULL, NULL, NULL}
 };
 /* }}} */
