@@ -15,4 +15,4 @@ var_dump(rrd_tune($destFile, array("true")));
 bool(true)
 bool(false)
 bool(true)
-DS[new-speed] typ: COUNTER      hbt: 600        min: nan        max: nan
+%s
