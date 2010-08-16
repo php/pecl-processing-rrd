@@ -146,7 +146,6 @@ PHP_METHOD(RRDCreator, __construct)
 		MAKE_STD_ZVAL(intern_obj->zv_step);
 		ZVAL_LONG(intern_obj->zv_step,step);
 	}
-	return;
 }
 /* }}} */
 
@@ -182,8 +181,6 @@ PHP_METHOD(RRDCreator, addDataSource)
 
 	add_next_index_string(intern_obj->zv_arr_data_sources, rrd_source_desc, 1);
 	efree(rrd_source_desc);
-
-	return;
 }
 /* }}} */
 
@@ -219,8 +216,6 @@ PHP_METHOD(RRDCreator, addArchive)
 
 	add_next_index_string(intern_obj->zv_arr_archives, rrd_archive_desc, 1);
 	efree(rrd_archive_desc);
-
-	return;
 }
 /* }}} */
 

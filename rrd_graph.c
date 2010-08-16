@@ -128,8 +128,6 @@ PHP_METHOD(RRDGraph, setOptions)
 	MAKE_STD_ZVAL(intern_obj->zv_arr_options);
 	*intern_obj->zv_arr_options = *zv_arr_options;
 	zval_copy_ctor(intern_obj->zv_arr_options);
-
-	return;
 }
 /* }}} */
 
