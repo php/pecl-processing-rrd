@@ -409,7 +409,7 @@ PHP_FUNCTION(rrd_restore)
 }
 /* }}} */
 
-/* {{{ proto int rrd_tune(string file, array options)
+/* {{{ proto bool rrd_tune(string file, array options)
 	Tune an RRD file with the options passed (passed via array) */
 PHP_FUNCTION(rrd_tune)
 {
@@ -448,6 +448,100 @@ PHP_FUNCTION(rrd_tune)
 }
 /* }}} */
 
+/* {{{ proto array rrd_xport(array options)
+ * Creates a graph based on options passed via an array
+ */
+PHP_FUNCTION(rrd_xport)
+{
+	zval *zv_arr_options;
+	rrd_args *argv;
+	/* return values from rrd_xport */
+	int xxsize;
+	time_t start, end, time_index;
+	ulong step, outvar_count;
+	char **legend_v;
+	rrd_value_t *data, *data_ptr;
+	zval *zv_data;
+	ulong outvar_index;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &zv_arr_options) == FAILURE) {
+		return;
+	}
+
+	argv = rrd_args_init_by_phparray("xport", "", zv_arr_options TSRMLS_CC);
+	if (!argv) {
+		zend_error(E_WARNING, "cannot allocate arguments options");
+		RETURN_FALSE;
+	}
+
+	if (rrd_test_error()) rrd_clear_error();
+
+	/* call rrd_xport and test if fails */
+	if (rrd_xport(argv->count-1, &argv->args[1], &xxsize, &start, &end, &step,
+		&outvar_count, &legend_v, &data) == -1) {
+		php_printf("rrd_xport failed");
+		rrd_args_free(argv);
+		RETURN_FALSE;
+	}
+
+	rrd_args_free(argv);
+
+	/* fill rrd_xport return values into array */
+	array_init(return_value);
+
+	add_assoc_long(return_value, "start", start + step);
+	add_assoc_long(return_value, "end", end);
+	add_assoc_long(return_value, "step", step);
+
+	/* no data available */
+	if (!data) {
+		add_assoc_null(return_value, "data");
+		return;
+	}
+
+	MAKE_STD_ZVAL(zv_data);
+	array_init(zv_data);
+
+	for (outvar_index = 0; outvar_index < outvar_count; outvar_index++) {
+		/* array for a whole one output variable data, it contains indexes
+		 * array(
+		 *  "legend" => "variable legend",
+		 *  "data" => array(
+		 *    920807400 => 0.14,
+		 *    920807800 => 21,
+		 *    ...
+		 *  ))
+		 */
+		zval *zv_var_data, *time_data;
+		MAKE_STD_ZVAL(zv_var_data);
+		array_init(zv_var_data);
+		MAKE_STD_ZVAL(time_data);
+		array_init(time_data);
+
+		add_assoc_string(zv_var_data, "legend", legend_v[outvar_index], 1);
+		free(legend_v[outvar_index]);
+
+		data_ptr = data + outvar_index;
+		for (time_index = start+step; time_index <= end; time_index += step) {
+			/* value for key (timestamp) in data array */
+			zval *zv_timestamp;
+			MAKE_STD_ZVAL(zv_timestamp);
+			ZVAL_LONG(zv_timestamp, time_index);
+			convert_to_string(zv_timestamp);
+
+			add_assoc_double(time_data, Z_STRVAL_P(zv_timestamp), *data_ptr);
+			data_ptr += outvar_count;
+			zval_dtor(zv_timestamp);
+		}
+		add_assoc_zval(zv_var_data, "data", time_data);
+		add_next_index_zval(zv_data, zv_var_data);
+	}
+	add_assoc_zval(return_value, "data", zv_data);
+	free(legend_v);
+	free(data);
+}
+/* }}} */
+
 /* {{{ arguments */
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_fetch, 0)
 	ZEND_ARG_INFO(0, file)
@@ -481,6 +575,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_rrd_tune, 0)
 	ZEND_ARG_INFO(0, file)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_rrd_xport, 0)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ */
@@ -496,6 +594,7 @@ static function_entry rrd_functions[] = {
 	PHP_FE(rrd_lastupdate, arginfo_rrd_lastupdate)
 	PHP_FE(rrd_restore, arginfo_rrd_restore)
 	PHP_FE(rrd_tune, arginfo_rrd_tune)
+	PHP_FE(rrd_xport, arginfo_rrd_xport)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -554,12 +653,12 @@ rrd_args *rrd_args_init_by_phparray(const char *command_name, const char *filena
 
 	rrd_args *result = (rrd_args *)emalloc(sizeof(rrd_args));
 	/* "dummy" + command_name + filename if presented */
-	result->count = option_count + (strlen(command_name) ? 3 : 2);
+	result->count = option_count + (strlen(filename) ? 3 : 2);
 	result->args = (char **)safe_emalloc(result->count, sizeof(char *), 0);
 
-	/* "dummy" and command_name are needed always needed */
+	/* "dummy" and command_name are always needed */
 	result->args[0] = "dummy";
-	result->args[1] = estrdup(filename);
+	result->args[1] = estrdup(command_name);
 
 	/* append filename if it's presented */
 	if (strlen(filename)) result->args[args_counter++] = estrdup(filename);
