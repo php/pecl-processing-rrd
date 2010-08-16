@@ -617,8 +617,8 @@ static PHP_MINIT_FUNCTION(rrd)
 static PHP_MINFO_FUNCTION(rrd)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "rrd wrapper", "enabled");
-	php_info_print_table_row(2, "Version", "0.1");
+	php_info_print_table_header(2, "rrd tool module", "enabled");
+	php_info_print_table_row(2, "rrd tool module version", PHP_RRD_VERSION);
 	php_info_print_table_end();
 }
 /* }}} */
@@ -633,7 +633,7 @@ zend_module_entry rrd_module_entry = {
 	NULL, /* PHP_RINIT(rrd) */
 	NULL, /* PHP_RSHUTDOWN(rrd) */
 	PHP_MINFO(rrd),
-	"0.1",
+	PHP_RRD_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
