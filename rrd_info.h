@@ -16,15 +16,17 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef RRD_GRAPH_H
-#define RRD_GRAPH_H
+#ifndef RRD_INFO_H
+#define RRD_INFO_H
 
-extern void rrd_graph_minit(TSRMLS_DC);
-extern PHP_FUNCTION(rrd_graph);
+extern PHP_FUNCTION(rrd_info);
 
-ZEND_BEGIN_ARG_INFO(arginfo_rrd_graph, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_rrd_info, 0)
 	ZEND_ARG_INFO(0, file)
-	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-#endif  /* RRD_GRAPH_H */
+/* necessary, because rrd_info_t definition is needed for function definition */
+#include <rrd.h>
+extern uint rrd_info_toarray(const rrd_info_t *rrd_info_data, zval *array TSRMLS_DC);
+
+#endif  /* RRD_INFO_H */

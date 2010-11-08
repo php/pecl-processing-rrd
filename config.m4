@@ -77,11 +77,11 @@ dnl Finish the setup
 
   if test "$ac_cv_rrdversion" = yes; then
     AC_DEFINE(HAVE_RRD_12X, 1, [Whether you have rrd_version])
-  fi 
+  fi
 
   PHP_ADD_LIBRARY_WITH_PATH(rrd, $RRDTOOL_LIBDIR, RRD_SHARED_LIBADD)
 
-  PHP_NEW_EXTENSION(rrd, rrd.c rrd_graph.c rrd_create.c rrd_update.c, $ext_shared)
+  PHP_NEW_EXTENSION(rrd, rrd.c rrd_graph.c rrd_create.c rrd_update.c rrd_info.c, $ext_shared)
   PHP_SUBST(RRD_SHARED_LIBADD)
   AC_DEFINE(HAVE_RRDTOOL, 1, [ ])
 fi

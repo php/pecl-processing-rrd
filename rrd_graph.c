@@ -20,20 +20,24 @@
 #include "config.h"
 #endif
 
-#include <rrd.h>
 #include "php.h"
-#include "php_rrd.h"
-#include "rrd_graph.h"
 #include "ext/standard/php_smart_str.h"
+
+#include <rrd.h>
+
+#include "php_rrd.h"
+#include "rrd_info.h"
+#include "rrd_graph.h"
 
 /* declare class entry */
 static zend_class_entry *ce_rrd_graph;
 /* declare class handlers */
 static zend_object_handlers rrd_graph_handlers;
 
-/* overloading the standard zend object structure (std property) in the need
-of having dedicated creating/cloning/destruction functions
-*/
+/**
+ * overloading the standard zend object structure (std property) in the need
+ * of having dedicated creating/cloning/destruction functions
+ */
 typedef struct _rrd_graph_object {
 	zend_object std;
 	char *file_path;
@@ -131,38 +135,22 @@ PHP_METHOD(RRDGraph, setOptions)
 }
 /* }}} */
 
-/* {{{ proto array RRDGraph::save()
-Saves graph according to current option
- */
-PHP_METHOD(RRDGraph, save)
+/* {{{
+ creates arguments for rrd_graph call for RRDGraph instance options
+*/
+static rrd_args *rrd_graph_obj_create_argv(const char *command_name, const rrd_graph_object *obj TSRMLS_DC)
 {
-	rrd_graph_object *intern_obj = (rrd_graph_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	/* iterated item */
 	zval **zv_option_val;
+	/* arguments for rrd_graph call as php array - temporary storage */
+	zval *zv_argv;
+	rrd_args *result;
 
-	/* returned values if rrd_graph doesn't fail */
-	int xsize, ysize;
-	double ymin,ymax;
-	char **calcpr;
+	MAKE_STD_ZVAL(zv_argv);
+	array_init(zv_argv);
 
-	/* help structures for preparing arguments for rrd_graph call */
-	zval *zv_graph_argv;
-	rrd_args *graph_argv;
-
-	if (!intern_obj->zv_arr_options || Z_TYPE_P(intern_obj->zv_arr_options) != IS_ARRAY) {
-		zend_throw_exception(zend_exception_get_default(TSRMLS_C),
-			"options aren't correctly set", 0 TSRMLS_CC);
-		return;
-	}
-
-	if (php_check_open_basedir(intern_obj->file_path TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-	/* makes array of arguments for rrd_graph call from options array */
-	MAKE_STD_ZVAL(zv_graph_argv);
-	array_init(zv_graph_argv);
-	zend_hash_internal_pointer_reset(Z_ARRVAL_P(intern_obj->zv_arr_options));
-	while(zend_hash_get_current_data(Z_ARRVAL_P(intern_obj->zv_arr_options), (void**)&zv_option_val) == SUCCESS) {
+	zend_hash_internal_pointer_reset(Z_ARRVAL_P(obj->zv_arr_options));
+	while (zend_hash_get_current_data(Z_ARRVAL_P(obj->zv_arr_options), (void**)&zv_option_val) == SUCCESS) {
 		/* copy for converted non-string value, because we don't want to modify
 		 * original array item
 		 */
@@ -176,14 +164,14 @@ PHP_METHOD(RRDGraph, save)
 		smart_str option = {0}; /* one argument option */
 
 		/* option with string key means long option, hence they are used as
-		 "key=value" e.g. "--start=920804400"
+		 * "key=value" e.g. "--start=920804400"
 		 */
-		if (zend_hash_get_current_key(Z_ARRVAL_P(intern_obj->zv_arr_options), &str_key, &num_key, 0) == HASH_KEY_IS_STRING) {
+		if (zend_hash_get_current_key(Z_ARRVAL_P(obj->zv_arr_options), &str_key, &num_key, 0) == HASH_KEY_IS_STRING) {
 			smart_str_appends(&option, str_key);
 			smart_str_appendc(&option, '=');
 		};
 
-		/* if option isn't string, use new value value for old one string conversion */
+		/* if option isn't string, use new value as old one casted to string */
 		if (Z_TYPE_PP(zv_option_val) != IS_STRING) {
 			option_str_copy = **zv_option_val;
 			zval_copy_ctor(&option_str_copy);
@@ -194,20 +182,51 @@ PHP_METHOD(RRDGraph, save)
 		smart_str_appendl(&option, Z_STRVAL_P(option_ptr), Z_STRLEN_P(option_ptr));
 		smart_str_0(&option);
 
-		add_next_index_string(zv_graph_argv, option.c, 1);
+		add_next_index_string(zv_argv, option.c, 1);
 
 		smart_str_free(&option);
 		if (option_ptr != *zv_option_val) {
 			zval_dtor(&option_str_copy);
 		}
 
-		zend_hash_move_forward(Z_ARRVAL_P(intern_obj->zv_arr_options));
+		zend_hash_move_forward(Z_ARRVAL_P(obj->zv_arr_options));
 	}
 
-	graph_argv = rrd_args_init_by_phparray("graph", intern_obj->file_path, zv_graph_argv TSRMLS_CC);
+	result = rrd_args_init_by_phparray(command_name, obj->file_path, zv_argv TSRMLS_CC);
+	zval_dtor(zv_argv);
+
+	return result;
+}
+/* }}} */
+
+/* {{{ proto array RRDGraph::save()
+Saves graph according to current option
+ */
+PHP_METHOD(RRDGraph, save)
+{
+	rrd_graph_object *intern_obj = (rrd_graph_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	/* returned values if rrd_graph doesn't fail */
+	int xsize, ysize;
+	double ymin,ymax;
+	char **calcpr;
+
+	/* arguments for rrd_graph call */
+	rrd_args *graph_argv;
+
+	if (!intern_obj->zv_arr_options || Z_TYPE_P(intern_obj->zv_arr_options) != IS_ARRAY) {
+		zend_throw_exception(zend_exception_get_default(TSRMLS_C),
+			"options aren't correctly set", 0 TSRMLS_CC);
+		return;
+	}
+
+	if (php_check_open_basedir(intern_obj->file_path TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
+	graph_argv = rrd_graph_obj_create_argv("graph", intern_obj TSRMLS_CC);
 	if (!graph_argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
-		zval_dtor(zv_graph_argv);
 		RETURN_FALSE;
 	}
 
@@ -220,6 +239,7 @@ PHP_METHOD(RRDGraph, save)
 		/* throw exception with rrd error string */
 		zend_throw_exception(zend_exception_get_default(TSRMLS_C), rrd_get_error(), 0 TSRMLS_CC);
 		rrd_clear_error();
+		rrd_args_free(graph_argv);
 		return;
 	}
 
@@ -237,12 +257,12 @@ PHP_METHOD(RRDGraph, save)
 	} else {
 		/* calcpr is presented, hence create array for it, and add it to return array */
 		zval *zv_calcpr_array;
-		INIT_PZVAL(zv_calcpr_array)
+		MAKE_STD_ZVAL(zv_calcpr_array)
 		array_init(zv_calcpr_array);
 		if (calcpr) {
 			uint i;
-			for (i=0; calcpr[i]; i++) {
-				add_next_index_string(&zv_calcpr_array, calcpr[i], 1);
+			for (i = 0; calcpr[i]; i++) {
+				add_next_index_string(zv_calcpr_array, calcpr[i], 1);
 				free(calcpr[i]);
 			}
 			free(calcpr);
@@ -250,7 +270,52 @@ PHP_METHOD(RRDGraph, save)
 		add_assoc_zval(return_value, "calcpr", zv_calcpr_array);
 	}
 
-	zval_dtor(zv_graph_argv);
+	rrd_args_free(graph_argv);
+}
+/* }}} */
+
+/* {{{ proto array RRDGraph::saveVerbose()
+Saves graph according to current option with return an extra information about
+saved image.
+*/
+PHP_METHOD(RRDGraph, saveVerbose)
+{
+	rrd_graph_object *intern_obj = (rrd_graph_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	/* return value from rrd_graphv */
+	rrd_info_t *rrd_info_data, *data_p;
+
+	/* arguments for rrd_graph call */
+	rrd_args *graph_argv;
+
+	if (!intern_obj->zv_arr_options || Z_TYPE_P(intern_obj->zv_arr_options) != IS_ARRAY) {
+		zend_throw_exception(zend_exception_get_default(TSRMLS_C),
+			"options aren't correctly set", 0 TSRMLS_CC);
+		return;
+	}
+
+	graph_argv = rrd_graph_obj_create_argv("graphv", intern_obj TSRMLS_CC);
+	if (!graph_argv) {
+		zend_error(E_WARNING, "cannot allocate arguments options");
+		RETURN_FALSE;
+	}
+
+	if (rrd_test_error()) rrd_clear_error();
+
+	/* call rrd graphv and test if fails */
+	rrd_info_data = rrd_graph_v(graph_argv->count - 1, &graph_argv->args[1]);
+	if (!rrd_info_data) {
+		/* throw exception with rrd error string */
+		zend_throw_exception(zend_exception_get_default(TSRMLS_C), rrd_get_error(), 0 TSRMLS_CC);
+		rrd_clear_error();
+		rrd_args_free(graph_argv);
+		return;
+	}
+
+	/* making return array */
+	array_init(return_value);
+	rrd_info_toarray(rrd_info_data, return_value);
+
+	rrd_info_free(rrd_info_data);
 	rrd_args_free(graph_argv);
 }
 /* }}} */
@@ -336,6 +401,7 @@ ZEND_END_ARG_INFO()
 static zend_function_entry rrd_graph_methods[] = {
 	PHP_ME(RRDGraph, __construct, arginfo_rrd_path, ZEND_ACC_PUBLIC)
 	PHP_ME(RRDGraph, save, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(RRDGraph, saveVerbose, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(RRDGraph, setOptions, arginfo_rrd_options, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };

@@ -33,8 +33,8 @@ typedef struct _rrd_args {
 	char **args;
 } rrd_args;
 
-rrd_args *rrd_args_init_by_phparray(const char *command_name, const char *filename,
+extern rrd_args *rrd_args_init_by_phparray(const char *command_name, const char *filename,
 	const zval *options TSRMLS_DC);
-void rrd_args_free(rrd_args *args);
+extern void rrd_args_free(rrd_args *args);
 
 #endif  /* PHP_RRD_H */
