@@ -10,7 +10,7 @@
   <email>koubel@php.net</email>
   <active>yes</active>
  </lead>
- <date>2010-01-03</date>
+ <date>2011-01-03</date>
  <version>
   <release>0.9.0</release>
   <api>0.9.0</api>
@@ -20,6 +20,11 @@
   <api>beta</api>
  </stability>
  <license>PHP License</license>
+ <!-- Notes for the latest release -->
+ <notes><![CDATA[
+  - first PECL release
+  ]]>
+ </notes>
  <contents>
   <dir name="/">
    <file name="rrd_info.c" role="src" />
