@@ -30,9 +30,9 @@ if test "$PHP_RRD" != "no"; then
      AC_MSG_RESULT(found in $RRDTOOL_INCDIR)
     fi
     dnl Library path
-    AC_MSG_CHECKING([for rrdtool library files in default path])
+    AC_MSG_CHECKING([for rrdtool library files in default paths])
     for i in librrd.$SHLIB_SUFFIX_NAME librrd.a; do
-      test -f $RRDTOOL_DIR/lib/$i && RRDTOOL_LIBDIR=$RRDTOOL_DIR/lib
+      test -f $libdir/$i -o -f $RRDTOOL_DIR/lib/$i && RRDTOOL_LIBDIR=$RRDTOOL_DIR/lib
     done
     if test -z "$RRDTOOL_LIBDIR"; then
       AC_MSG_RESULT([not found])
