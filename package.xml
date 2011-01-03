@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.7.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+ <name>rrd</name>
+ <channel>pecl.php.net</channel>
+ <summary>PHP bindings to rrd tool system</summary>
+ <description>Procedural and simple OO wrapper for rrdtool - data logging and graphing system for time series data.</description>
+ <lead>
+  <name>Miroslav Kubelik</name>
+  <user>koubel</user>
+  <email>koubel@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>2010-01-03</date>
+ <version>
+  <release>0.9.0</release>
+  <api>0.9.0</api>
+ </version>
+ <stability>
+  <release>beta</release>
+  <api>beta</api>
+ </stability>
+ <license>PHP License</license>
+ <contents>
+  <dir name="/">
+   <file name="rrd_info.c" role="src" />
+   <file name="rrd_info.h" role="src" />
+   <file name="rrd_graph.c" role="src" />
+   <file name="rrd_graph.h" role="src" />
+   <file name="rrd.c" role="src" />
+   <file name="php_rrd.h" role="src" />
+   <file name="config.m4" role="src" />
+   <file name="rrd_update.c" role="src" />
+   <file name="rrd_update.h" role="src" />
+   <file name="rrd_create.h" role="src" />
+   <file name="rrd_create.c" role="src" />
+   <file name="CREDITS" role="doc" />
+  </dir>
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.2</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>rrd</providesextension>
+ <extsrcrelease />
+ <changelog>
+  <release>
+   <version>
+    <release>0.9.0</release>
+    <api>0.9.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <notes>first official pecl release</notes>
+  </release>
+ </changelog>
+</package>

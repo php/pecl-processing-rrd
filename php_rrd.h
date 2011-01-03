@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2010 The PHP Group                                |
+  | Copyright (c) 1997-2011 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 extern zend_module_entry rrd_module_entry;
 #define phpext_rrd_ptr &rrd_module_entry
 
-#define PHP_RRD_VERSION "0.9"
+#define PHP_RRD_VERSION "0.9.0"
 
 #ifdef ZTS
 #include "TSRM.h"
