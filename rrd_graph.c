@@ -21,6 +21,7 @@
 #endif
 
 #include "php.h"
+#include "zend_exceptions.h"
 #include "ext/standard/php_smart_str.h"
 
 #include <rrd.h>

@@ -23,6 +23,7 @@
 #include "php.h"
 #include "ext/standard/php_smart_str.h"
 #include "ext/standard/php_array.h"
+#include "ext/standard/info.h"
 
 #include <rrd.h>
 

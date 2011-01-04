@@ -24,6 +24,7 @@
 #include "php.h"
 #include "php_rrd.h"
 #include "rrd_update.h"
+#include "zend_exceptions.h"
 #include "ext/standard/php_smart_str.h"
 
 /* declare class entry */

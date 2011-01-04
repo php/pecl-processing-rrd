@@ -24,6 +24,7 @@
 #include "php.h"
 #include "rrd_create.h"
 #include "php_rrd.h"
+#include "zend_exceptions.h"
 #include "ext/standard/php_array.h"
 
 /* declare class entry */
