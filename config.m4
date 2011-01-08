@@ -64,24 +64,14 @@ dnl Finish the setup
     -L$RRDTOOL_LIBDIR -ldl
   ])
 
- AC_MSG_CHECKING([rrdtool version])
-  AC_TRY_COMPILE([
-#include <$RRD_H_PATH>
-  ], [int main() {
-    double some_variable;
-    some_variable = rrd_version();
-    }
-  ], [
-    AC_MSG_RESULT([1.2.x])
-    ac_cv_rrdversion=yes
-    ], [
-    AC_MSG_RESULT([1.0.x])
-    ac_cv_rrdversion=no
-    ])
-
-  if test "$ac_cv_rrdversion" = yes; then
-    AC_DEFINE(HAVE_RRD_12X, 1, [Whether you have rrd_version])
+  dnl rrd_version is available in 1.2.0+
+  PHP_CHECK_FUNC(rrd_version, rrd)
+  if test "$ac_cv_func_rrd_version" != yes; then
+    AC_MSG_ERROR([rrd lib version seems older then 1.2.0+, update to 1.3.0+])
   fi
+
+  dnl rrd_lastupdate_r available in 1.4.0+
+  PHP_CHECK_FUNC(rrd_lastupdate_r, rrd)
 
   PHP_ADD_LIBRARY_WITH_PATH(rrd, $RRDTOOL_LIBDIR, RRD_SHARED_LIBADD)
 

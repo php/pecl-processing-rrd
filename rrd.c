@@ -244,8 +244,13 @@ PHP_FUNCTION(rrd_lastupdate)
 
 	if (rrd_test_error()) rrd_clear_error();
 
-	if (rrd_lastupdate(2, &argv[1], &last_update, &ds_cnt, &ds_namv,
+#ifdef HAVE_RRD_LASTUPDATE_R
+	if (rrd_lastupdate_r(argv[2], &last_update, &ds_cnt, &ds_namv,
 		&last_ds) == -1) {
+#else
+ 	if (rrd_lastupdate(2, &argv[1], &last_update, &ds_cnt, &ds_namv,
+ 		&last_ds) == -1) {
+#endif
 		efree(argv[2]); efree(argv[1]);
 		RETURN_FALSE;
 	}
