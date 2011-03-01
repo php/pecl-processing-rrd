@@ -294,7 +294,7 @@ PHP_METHOD(RRDCreator, save)
 }
 /* }}} */
 
-/* {{{ proto int rrd_create(string file, array options)
+/* {{{ proto bool rrd_create(string file, array options)
 	Create an RRD file with the options passed
  */
 PHP_FUNCTION(rrd_create)
