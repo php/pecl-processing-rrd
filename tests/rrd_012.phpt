@@ -8,7 +8,7 @@ $rrdFile = dirname(__FILE__) . "/testData/speed.rrd";
 var_dump(rrd_info($rrdFile));
 ?>
 --EXPECTF--
-array(25) {
+array(27) {
   ["filename"]=>
   string(61) %s
   ["rrd_version"]=>
@@ -17,6 +17,10 @@ array(25) {
   int(300)
   ["last_update"]=>
   int(920808900)
+  ["header_size"]=>
+  int(740)
+  ["ds[speed].index"]=>
+  int(0)
   ["ds[speed].type"]=>
   string(7) "COUNTER"
   ["ds[speed].minimal_heartbeat"]=>

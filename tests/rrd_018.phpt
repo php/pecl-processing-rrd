@@ -18,7 +18,7 @@ $graphObj->setOptions(array(
 var_dump($graphObj->saveVerbose());
 ?>
 --EXPECTF--
-array(8) {
+array(10) {
   ["graph_left"]=>
   int(67)
   ["graph_top"]=>
@@ -30,7 +30,11 @@ array(8) {
   ["image_width"]=>
   int(497)
   ["image_height"]=>
-  int(149)
+  int(148)
+  ["graph_start"]=>
+  int(920804400)
+  ["graph_end"]=>
+  int(920808000)
   ["value_min"]=>
   float(0)
   ["value_max"]=>

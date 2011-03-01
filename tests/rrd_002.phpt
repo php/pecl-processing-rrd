@@ -23,7 +23,7 @@ array(3) {
   ["xsize"]=>
   int(497)
   ["ysize"]=>
-  int(149)
+  int(148)
   ["calcpr"]=>
   NULL
 }
