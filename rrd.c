@@ -102,7 +102,7 @@ PHP_FUNCTION(rrd_fetch)
 	if (!ds_namv || !ds_cnt) {
 		add_assoc_null(return_value, "ds_namv");
 	} else {
-		/* count of intems in ds_namv array, total count is stored in
+		/* count of items in ds_namv array, total count is stored in
 		 * ds_cnt value
 		 */
 		uint i;
