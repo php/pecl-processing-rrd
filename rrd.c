@@ -94,59 +94,65 @@ PHP_FUNCTION(rrd_fetch)
 	add_assoc_long(return_value, "start", start);
 	add_assoc_long(return_value, "end", end);
 	add_assoc_long(return_value, "step", step);
-	add_assoc_long(return_value, "ds_cnt", ds_cnt);
 
-	/* add "ds_namv" return values to return array under "ds_namv" key
-	 * if no data sources are presented add PHP NULL value
+	/* add "ds_namv" and "data" array into return values if there is any
+	 * result data
 	 */
-	if (!ds_namv || !ds_cnt) {
-		add_assoc_null(return_value, "ds_namv");
-	} else {
-		/* count of items in ds_namv array, total count is stored in
-		 * ds_cnt value
-		 */
-		uint i;
-		/* "ds_namv" is presented, hence create array for it, and add it to
-		 * return array
-		 */
-		zval *zv_ds_namv_array;
-		MAKE_STD_ZVAL(zv_ds_namv_array)
-		array_init(zv_ds_namv_array);
-		for	(i=0; i < ds_cnt; i++) {
-			add_next_index_string(zv_ds_namv_array, ds_namv[i], 1);
-			free(ds_namv[i]);
-		}
-		free(ds_namv);
-		add_assoc_zval(return_value, "ds_navm", zv_ds_namv_array);
-	}
-
-	/* Add all data from all sources as array under "data" key in return array.
-	 * If no data are presented add PHP NULL value
-	 */
-	if (!ds_data) {
+	if (!ds_data || !ds_namv || !ds_cnt) {
 		add_assoc_null(return_value, "data");
 	} else {
 		rrd_value_t *datap = ds_data;
 		uint timestamp, ds_counter;
+		/* final array for all data from all data sources */
 		zval *zv_data_array;
 
 		MAKE_STD_ZVAL(zv_data_array)
 		array_init(zv_data_array);
+
+		/* add arrays for each data source, each array will be filled with
+		 * retrieved data for a particular data source
+		 */
+		for (ds_counter = 0; ds_counter < ds_cnt; ds_counter++) {
+			zval *zv_ds_data_array;
+			MAKE_STD_ZVAL(zv_ds_data_array)
+			array_init(zv_ds_data_array);
+
+			add_assoc_zval(zv_data_array, ds_namv[ds_counter], zv_ds_data_array);
+		}
+
 		for (timestamp = start + step; timestamp <= end; timestamp += step) {
+			/* try to find current data source result array in the
+			 * zv_data_array
+			 */
+			zend_hash_internal_pointer_reset(Z_ARRVAL_P(zv_data_array));
 			for (ds_counter = 0; ds_counter < ds_cnt; ds_counter++) {
+				/* pointer for one data source retrieved data */
+				zval **ds_data_array;
 				/* value for key (timestamp) in data array */
 				zval *zv_timestamp;
+
 				MAKE_STD_ZVAL(zv_timestamp);
 				ZVAL_LONG(zv_timestamp, timestamp);
 				convert_to_string(zv_timestamp);
 
-				add_assoc_double(zv_data_array, Z_STRVAL_P(zv_timestamp), *(datap++));
+				/* gets pointer for data source result array */
+				zend_hash_get_current_data(Z_ARRVAL_P(zv_data_array), (void**) &ds_data_array);
+
+				add_assoc_double(*ds_data_array, Z_STRVAL_P(zv_timestamp), *(datap++));
+
+				zend_hash_move_forward(Z_ARRVAL_P(zv_data_array));
+
 				zval_dtor(zv_timestamp);
 			}
 		}
-		free(ds_data);
-
 		add_assoc_zval(return_value, "data", zv_data_array);
+
+		/* free data from rrd_fetch */
+		free(ds_data);
+		for (ds_counter = 0; ds_counter < ds_cnt; ds_counter++) {
+			free(ds_namv[ds_counter]);
+		}
+		free(ds_namv);
 	}
 
 	rrd_args_free(argv);
