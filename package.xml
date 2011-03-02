@@ -10,19 +10,22 @@
   <email>koubel@php.net</email>
   <active>yes</active>
  </lead>
- <date>2011-01-03</date>
+ <!-- latest release information -->
+ <date>2011-03-03</date>
  <version>
-  <release>0.9.0</release>
-  <api>0.9.0</api>
+  <release>0.10.0</release>
+  <api>0.10.0</api>
  </version>
  <stability>
-  <release>beta</release>
+  <release>stable</release>
   <api>beta</api>
  </stability>
  <license>PHP License</license>
- <!-- Notes for the latest release -->
  <notes><![CDATA[
-  - first PECL release
+  - fixed all reported bugs
+  - fixed major bug in rrd_fetch #21402
+  - BC break : rdd_fetch returned array format changed, these items doesn't
+   exist anymore - "ds_cnt", "ds_namv"
   ]]>
  </notes>
  <contents>
@@ -39,12 +42,42 @@
    <file name="rrd_create.h" role="src" />
    <file name="rrd_create.c" role="src" />
    <file name="CREDITS" role="doc" />
+    <dir name="tests">
+     <file role="test" name="rrd_001.phpt" />
+     <file role="test" name="rrd_002.phpt" />
+     <file role="test" name="rrd_003.phpt" />
+     <file role="test" name="rrd_004.phpt" />
+     <file role="test" name="rrd_005.phpt" />
+     <file role="test" name="rrd_006.phpt" />
+     <file role="test" name="rrd_007.phpt" />
+     <file role="test" name="rrd_008.phpt" />
+     <file role="test" name="rrd_009.phpt" />
+     <file role="test" name="rrd_010.phpt" />
+     <file role="test" name="rrd_011.phpt" />
+     <file role="test" name="rrd_012.phpt" />
+     <file role="test" name="rrd_013.phpt" />
+     <file role="test" name="rrd_014.phpt" />
+     <file role="test" name="rrd_015.phpt" />
+     <file role="test" name="rrd_016.phpt" />
+     <file role="test" name="rrd_017.phpt" />
+     <file role="test" name="rrd_018.phpt" />
+     <file role="test" name="rrd_019.phpt" />
+     <dir name="testData">
+      <file role="data" name="speed.rrd" />
+      <file role="data" name="speed.png" />
+      <file role="data" name="moreDS_fetch.txt" />
+      <file role="data" name="moreDS.rrd" />
+      <file role="doc" name="readme.txt" />
+      <file role="data" name="rrd_updater_fetch.txt" />
+      <file role="data" name="speed-dump.xml" />
+     </dir>
+    </dir>
   </dir>
  </contents>
  <dependencies>
   <required>
    <php>
-    <min>5.2</min>
+    <min>5.3.2</min>
    </php>
    <pearinstaller>
     <min>1.4.0</min>
@@ -56,6 +89,24 @@
  <changelog>
   <release>
    <version>
+    <release>0.10.0</release>
+    <api>0.10.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>beta</api>
+   </stability>
+   <notes><![CDATA[
+  - fixed all reported bugs
+  - fixed major bug in rrd_fetch #21402
+  - BC break : rdd_fetch returned array format changed, these items doesn't
+   exist anymore - "ds_cnt", "ds_namv"
+  ]]>
+   </notes>
+   <date>2011-03-03</date>
+  </release>
+  <release>
+   <version>
     <release>0.9.0</release>
     <api>0.9.0</api>
    </version>
@@ -64,6 +115,7 @@
     <api>beta</api>
    </stability>
    <notes>first official pecl release</notes>
+   <date>2011-01-03</date>
   </release>
  </changelog>
 </package>
