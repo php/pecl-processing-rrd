@@ -4,6 +4,14 @@ dnl Comments in this file start with the string 'dnl'.
 PHP_ARG_WITH(rrd, for rrdtool support,
 [  --with-rrd[=DIR]          Include rrdtool support (requires rrdtool >= 1.3.x)])
 
+AC_ARG_WITH(rrd-binary,
+[AC_HELP_STRING([--with-rrd-binary][=PATH], [rrd binary dir path, mostly for testing (default=$PATH)])],
+[AC_PATH_PROG(RRDTOOL_BIN, rrdtool, no, $withval)],
+[AC_PATH_PROG(RRDTOOL_BIN, rrdtool, no, $PATH)])
+
+AC_SUBST(RRDTOOL_BIN)
+AC_OUTPUT(tests/rrdtool-bin.inc)
+
 if test "$PHP_RRD" != "no"; then
   if test "$PHP_RRD" != "yes"; then
   AC_MSG_CHECKING(if rrdtool specified path is valid)
