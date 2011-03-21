@@ -4,12 +4,19 @@ RRDUpdater test
 <?php
 include('skipif.inc');
 include('rrdtool-bin.inc');
+include('data/definition.inc');
+foreach(array($data_emptyDb, $data_updaterTxt) as $file) {
+	if (!file_exists($file)) {
+		die("skip $file doesnt' exist");
+	}
+}
 ?>
 --FILE--
 <?php
 include('rrdtool-bin.inc');
+include('data/definition.inc');
 $rrdFile = dirname(__FILE__) . "/rrd_updater_test.rrd";
-copy(dirname(__FILE__) . "/data/speed-empty.rrd", $rrdFile);
+copy($data_emptyDb, $rrdFile);
 
 $updator = new RRDUpdater($rrdFile);
 $updator->update(array("speed" => "12345"), "920804700");
@@ -29,7 +36,8 @@ $updator->update(array("speed" => "12422"), "920808600");
 $updator->update(array("speed" => "12423"), "920808900");
 
 //graph just for "visual test" if test fails
-$command = "$rrdtool_bin graph " . dirname(__FILE__) . "/rrd_updater_test.png "
+$command = "$rrdtool_bin graph "
+ . dirname(__FILE__) . "/rrd_updater_test.png "
  . "--start 920804400 --end 920808000 "
  . "--vertical-label m/s "
  . "DEF:myspeed=$rrdFile:speed:AVERAGE "
@@ -42,7 +50,7 @@ exec($command);
 $command = "$rrdtool_bin fetch $rrdFile AVERAGE --start 920804400 --end 920809200";
 $output = array();
 exec($command, $output);
-$originalFetch = file(dirname(__FILE__)."/data/rrd_updater_fetch.txt", FILE_IGNORE_NEW_LINES);
+$originalFetch = file($data_updaterTxt, FILE_IGNORE_NEW_LINES);
 echo "comparing original and current fetch\n";
 var_dump(array_diff($output, $originalFetch));
 ?>

@@ -1,18 +1,20 @@
 --TEST--
 RRDUpdater default timestamp test
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php
+include('skipif.inc');
+include('rrdtool-bin.inc');
+include('data/definition.inc');
+if (!file_exists($data_emptyDb)) {
+	die("skip $data_emptyDb doesnt' exist");
+}
+?>
 --FILE--
 <?php
-$rrdFile = dirname(__FILE__) . "/updateTestDefaultVal.rrd";
-$command = "rrdtool create $rrdFile "
- . "--start now "
- . "--step 1 "
- . "DS:speed:COUNTER:600:U:U "
- . "RRA:AVERAGE:0.5:1:24 "
- . "RRA:AVERAGE:0.5:6:10";
-echo "creating rrdfile for update test via exec\n";
-exec($command);
+include('rrdtool-bin.inc');
+include('data/definition.inc');
+$rrdFile = dirname(__FILE__) . "/rrd_updater_default_val.rrd";
+copy($data_emptyDb, $rrdFile);
 
 $updator = new RRDUpdater($rrdFile);
 $updator->update(array("speed" => "12345"));
@@ -26,16 +28,17 @@ sleep(1);
 $updator->update(array("speed" => "12363"));
 sleep(1);
 
-$command = "rrdtool graph ".dirname(__FILE__)."/updateTestDefaultVal.png "
+//mostly for "visual test"
+$command = "$rrdtool_bin graph "
+ . dirname(__FILE__) . "/rrd_updater_default_val.png "
  . "--start -5s --end now "
  . "--vertical-label m/s "
  . "DEF:myspeed=$rrdFile:speed:AVERAGE "
  . "CDEF:realspeed=myspeed,1000,* "
  . "LINE2:realspeed#FF0000";
 
-echo "exporting updateTestDefaultVal.png via exec\n";
+echo "exporting graph via exec\n";
 exec($command);
 ?>
 --EXPECTF--
-creating rrdfile for update test via exec
-exporting updateTestDefaultVal.png via exec
+exporting %s via exec
