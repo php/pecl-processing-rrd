@@ -1,5 +1,5 @@
 <?php
-if (!extension_loaded("trala")) {
-	die("rrd extension isn't loaded");
+if (!extension_loaded("rrd")) {
+	die("skip rrd extension isn't loaded");
 }
 ?>
