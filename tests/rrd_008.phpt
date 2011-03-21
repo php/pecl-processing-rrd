@@ -4,7 +4,7 @@ rrd_graph test
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
-$rrdFile = dirname(__FILE__) . "/testData/speed.rrd";
+$rrdFile = dirname(__FILE__) . "/data/speed.rrd";
 $command = "rrdtool graph " . dirname(__FILE__) . "/rrd_graph_speed_exec.png "
  . "--start 920804400 --end 920808000 "
  . "--vertical-label m/s "

@@ -4,7 +4,7 @@ rrd_xport test
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
-$rrdFile = dirname(__FILE__) . "/testData/speed.rrd";
+$rrdFile = dirname(__FILE__) . "/data/speed.rrd";
 var_dump(rrd_xport(array(
 	"--start=920804400",
 	"--end=920808000",

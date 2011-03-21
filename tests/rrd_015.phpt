@@ -4,7 +4,7 @@ rrd_restore test
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
-$xmlFile = dirname(__FILE__) . "/testData/speed-dump.xml";
+$xmlFile = dirname(__FILE__) . "/data/speed-dump.xml";
 $rrdFile = dirname(__FILE__) . "/restore-result.rrd";
 //if rrd file isn't deleted, rrd_restore without options fails
 @unlink($rrdFile);

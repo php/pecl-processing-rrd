@@ -4,7 +4,7 @@ rrd_last test
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
-$rrdFile = dirname(__FILE__) . "/testData/speed.rrd";
+$rrdFile = dirname(__FILE__) . "/data/speed.rrd";
 var_dump(rrd_last($rrdFile));
 ?>
 --EXPECTF--

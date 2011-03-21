@@ -4,15 +4,15 @@ rrd_info test
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
-$rrdFile = dirname(__FILE__) . "/testData/speed.rrd";
+$rrdFile = dirname(__FILE__) . "/data/speed.rrd";
 var_dump(rrd_info($rrdFile));
 ?>
 --EXPECTF--
 array(27) {
   ["filename"]=>
-  string(61) %s
+  string(%d) %s
   ["rrd_version"]=>
-  string(4) "0003"
+  string(4) %s
   ["step"]=>
   int(300)
   ["last_update"]=>
@@ -40,7 +40,7 @@ array(27) {
   ["rra[0].rows"]=>
   int(24)
   ["rra[0].cur_row"]=>
-  int(9)
+  int(8)
   ["rra[0].pdp_per_row"]=>
   int(1)
   ["rra[0].xff"]=>
@@ -54,7 +54,7 @@ array(27) {
   ["rra[1].rows"]=>
   int(10)
   ["rra[1].cur_row"]=>
-  int(0)
+  int(6)
   ["rra[1].pdp_per_row"]=>
   int(6)
   ["rra[1].xff"]=>

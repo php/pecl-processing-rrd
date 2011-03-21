@@ -5,7 +5,7 @@ rrd_tune test
 --FILE--
 <?php
 $destFile = dirname(__FILE__) . "/tune-test.rrd";
-copy(dirname(__FILE__) . "/testData/speed.rrd", $destFile);
+copy(dirname(__FILE__) . "/data/speed.rrd", $destFile);
 var_dump(rrd_tune($destFile, array("--data-source-rename=speed:new-speed")));
 var_dump(rrd_tune($destFile, array("--lala")));
 //maybe bug in rrd_tune?

@@ -4,7 +4,7 @@ rrd_fetch test
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
-var_dump(rrd_fetch(dirname(__FILE__) . "/testData/moreDS.rrd", array(
+var_dump(rrd_fetch(dirname(__FILE__) . "/data/moreDS.rrd", array(
 	"--start", "920804400",
 	"--end", "920808000",
 	"AVERAGE"
