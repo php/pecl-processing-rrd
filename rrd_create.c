@@ -115,7 +115,7 @@ PHP_METHOD(RRDCreator, __construct)
 	char *path; int path_length;
 	/* better to set defaults for optional parameters */
 	char *start_time = NULL; int start_time_length = 0;
-	uint step = 0;
+	long step = 0;
 	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "s|sl", &path, &path_length,
