@@ -1,11 +1,18 @@
 --TEST--
 rrd_info test
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php
+include('skipif.inc');
+include('data/definition.inc');
+if (!file_exists($data_updatedDb)) {
+	die("skip $data_updatedDb doesn't exist");
+}
+?>
 --FILE--
 <?php
-$rrdFile = dirname(__FILE__) . "/data/speed.rrd";
-var_dump(rrd_info($rrdFile));
+include('data/definition.inc');
+var_dump($info = rrd_info($data_updatedDb));
+var_dump($info["filename"] == $data_updatedDb);
 ?>
 --EXPECTF--
 array(27) {
@@ -18,7 +25,7 @@ array(27) {
   ["last_update"]=>
   int(920808900)
   ["header_size"]=>
-  int(740)
+  int(%d)
   ["ds[speed].index"]=>
   int(0)
   ["ds[speed].type"]=>
@@ -40,7 +47,7 @@ array(27) {
   ["rra[0].rows"]=>
   int(24)
   ["rra[0].cur_row"]=>
-  int(8)
+  int(%d)
   ["rra[0].pdp_per_row"]=>
   int(1)
   ["rra[0].xff"]=>
@@ -54,7 +61,7 @@ array(27) {
   ["rra[1].rows"]=>
   int(10)
   ["rra[1].cur_row"]=>
-  int(6)
+  int(%d)
   ["rra[1].pdp_per_row"]=>
   int(6)
   ["rra[1].xff"]=>
@@ -64,3 +71,4 @@ array(27) {
   ["rra[1].cdp_prep[0].unknown_datapoints"]=>
   int(0)
 }
+bool(true)

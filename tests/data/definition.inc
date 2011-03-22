@@ -7,4 +7,3 @@ $data_xmdDbdump = "$data_dir/sped-dump.xml";
 $data_updaterTxt = "$data_dir/rrd_updater_fetch.txt";
 $data_moreDSDb = "$data_dir/moreDS.rrd";
 $data_moreDSDb_fetched = "$data_dir/moreDS_fetch.txt";
-
