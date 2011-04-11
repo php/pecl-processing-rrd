@@ -1,10 +1,17 @@
 --TEST--
 RRDGraph saveVerbose full export test
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php
+include('skipif.inc');
+include('data/definition.inc');
+if (!file_exists($data_updatedDb)) {
+	die("skip $data_updatedDb doesn't exist");
+}
+?>
 --FILE--
 <?php
-$rrdFile = dirname(__FILE__) . "/data/speed.rrd";
+include('data/definition.inc');
+$rrdFile = $data_updatedDb;
 $outputPngFile = "-";
 $graphObj = new RRDGraph($outputPngFile);
 $graphObj->setOptions(array(

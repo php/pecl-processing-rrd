@@ -1,10 +1,16 @@
 --TEST--
 rrd_restore test
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php include('skipif.inc');
+include('data/definition.inc');
+if (!file_exists($data_xmdDbdump)) {
+	die("skip $data_xmdDbdump doesn't exist");
+}
+?>
 --FILE--
 <?php
-$xmlFile = dirname(__FILE__) . "/data/speed-dump.xml";
+include('data/definition.inc');
+$xmlFile = $data_xmdDbdump;
 $rrdFile = dirname(__FILE__) . "/restore-result.rrd";
 //if rrd file isn't deleted, rrd_restore without options fails
 @unlink($rrdFile);

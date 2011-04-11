@@ -1,14 +1,20 @@
 --TEST--
 rrd_xport test
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php
+include('skipif.inc');
+include('data/definition.inc');
+if (!file_exists($data_updatedDb)) {
+	die("skip $data_updatedDb doesn't exist");
+}
+?>
 --FILE--
 <?php
-$rrdFile = dirname(__FILE__) . "/data/speed.rrd";
+include('data/definition.inc');
 var_dump(rrd_xport(array(
 	"--start=920804400",
 	"--end=920808000",
-	"DEF:myspeed=$rrdFile:speed:AVERAGE",
+	"DEF:myspeed=$data_updatedDb:speed:AVERAGE",
 	"CDEF:realspeed=myspeed,1000,*",
 	"XPORT:myspeed:myspeed",
 	"XPORT:realspeed:realspeed"

@@ -1,14 +1,22 @@
 --TEST--
 rrd_graph test
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+include('skipif.inc');
+include('rrdtool-bin.inc');
+include('data/definition.inc');
+if (!file_exists($data_updatedDb)) {
+	die("skip $data_updatedDb doesnt' exist");
+}
+?>
 --FILE--
 <?php
-$rrdFile = dirname(__FILE__) . "/data/speed.rrd";
+include('rrdtool-bin.inc');
+include('data/definition.inc');
+
 $command = "rrdtool graph " . dirname(__FILE__) . "/rrd_graph_speed_exec.png "
  . "--start 920804400 --end 920808000 "
  . "--vertical-label m/s "
- . "DEF:myspeed=$rrdFile:speed:AVERAGE "
+ . "DEF:myspeed=$data_updatedDb:speed:AVERAGE "
  . "CDEF:realspeed=myspeed,1000,* "
  . "LINE2:realspeed#FF0000";
 
@@ -20,7 +28,7 @@ var_dump(rrd_graph($outputPngFile, array(
 	"--start", "920804400",
 	"--end", "920808000",
 	"--vertical-label", "m/s",
-	"DEF:myspeed=$rrdFile:speed:AVERAGE",
+	"DEF:myspeed=$data_updatedDb:speed:AVERAGE",
 	"CDEF:realspeed=myspeed,1000,*",
 	"LINE2:realspeed#FF0000"
 )));

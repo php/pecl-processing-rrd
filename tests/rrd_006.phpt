@@ -1,18 +1,20 @@
 --TEST--
 rrd_update test
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php
+include('skipif.inc');
+include('rrdtool-bin.inc');
+include('data/definition.inc');
+if (!file_exists($data_emptyDb)) {
+	die("skip $data_emptyDb doesnt' exist");
+}
+?>
 --FILE--
 <?php
+include('rrdtool-bin.inc');
+include('data/definition.inc');
 $rrdFile = dirname(__FILE__) . "/rrd_update_1.rrd";
-
-$command = "rrdtool create $rrdFile "
- . "--start 920804400 "
- . "DS:speed:COUNTER:600:U:U "
- . "RRA:AVERAGE:0.5:1:24 "
- . "RRA:AVERAGE:0.5:6:10";
-echo "creating rrdfile for update test via exec\n";
-exec($command);
+copy($data_emptyDb, $rrdFile);
 
 $retval = rrd_update($rrdFile, array(
 	"920804700:12345",
@@ -32,7 +34,8 @@ $retval = rrd_update($rrdFile, array(
 	"920808900:12423"
 ));
 
-$command = "rrdtool graph ".dirname(__FILE__)."/rrd_update_1.png "
+//graph just for "visual test" if test fails
+$command = "$rrdtool_bin graph " . dirname(__FILE__) . "/rrd_update_1.png "
  . "--start 920804400 --end 920808000 "
  . "--vertical-label m/s "
  . "DEF:myspeed=$rrdFile:speed:AVERAGE "
@@ -44,6 +47,5 @@ exec($command);
 var_dump($retval);
 ?>
 --EXPECTF--
-creating rrdfile for update test via exec
 exporting rrd_update_1.png via exec
 bool(true)

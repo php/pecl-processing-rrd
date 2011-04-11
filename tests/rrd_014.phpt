@@ -1,11 +1,17 @@
 --TEST--
 rrd_lastupdate test
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php
+include('skipif.inc');
+include('data/definition.inc');
+if (!file_exists($data_updatedDb)) {
+	die("skip $data_updatedDb doesn't exist");
+}
+?>
 --FILE--
 <?php
-$rrdFile = dirname(__FILE__) . "/data/speed.rrd";
-var_dump(rrd_lastupdate($rrdFile));
+include('data/definition.inc');
+var_dump(rrd_lastupdate($data_updatedDb));
 ?>
 --EXPECTF--
 array(4) {

@@ -1,10 +1,15 @@
 --TEST--
 rrd_fetch test
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+include('skipif.inc');
+include('data/definition.inc');
+if (!file_exists($data_moreDSDb)) {
+	die("skip $data_moreDSDb doesnt' exist");
+}
 --FILE--
 <?php
-var_dump(rrd_fetch(dirname(__FILE__) . "/data/moreDS.rrd", array(
+include('data/definition.inc');
+var_dump(rrd_fetch($data_moreDSDb, array(
 	"--start", "920804400",
 	"--end", "920808000",
 	"AVERAGE"
