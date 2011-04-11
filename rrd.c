@@ -494,6 +494,14 @@ PHP_FUNCTION(rrd_xport)
 }
 /* }}} */
 
+/* {{{ proto string rrd_version()
+ * Gets version of underlying librrd.
+ */
+PHP_FUNCTION(rrd_version)
+{
+	RETVAL_STRING(rrd_strversion(), 1);
+}
+
 /* {{{ arguments */
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_fetch, 0)
 	ZEND_ARG_INFO(0, file)
@@ -527,6 +535,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_xport, 0)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_rrd_version, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ */
@@ -543,6 +554,7 @@ static function_entry rrd_functions[] = {
 	PHP_FE(rrd_restore, arginfo_rrd_restore)
 	PHP_FE(rrd_tune, arginfo_rrd_tune)
 	PHP_FE(rrd_xport, arginfo_rrd_xport)
+	PHP_FE(rrd_version, arginfo_rrd_version)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -567,6 +579,7 @@ static PHP_MINFO_FUNCTION(rrd)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "rrd tool module", "enabled");
 	php_info_print_table_row(2, "rrd tool module version", PHP_RRD_VERSION);
+	php_info_print_table_row(2, "rrdtool library version", rrd_strversion());
 	php_info_print_table_end();
 }
 /* }}} */
