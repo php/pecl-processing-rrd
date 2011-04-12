@@ -11,6 +11,7 @@ AC_ARG_WITH(rrd-binary,
 
 AC_SUBST(RRDTOOL_BIN)
 AC_OUTPUT(tests/rrdtool-bin.inc)
+AC_OUTPUT(tests/data/Makefile)
 
 if test "$PHP_RRD" != "no"; then
   if test "$PHP_RRD" != "yes"; then
