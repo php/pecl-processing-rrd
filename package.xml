@@ -11,10 +11,10 @@
   <active>yes</active>
  </lead>
  <!-- latest release information -->
- <date>2011-04-12</date>
+ <date>2011-04-16</date>
  <version>
-  <release>1.0.0</release>
-  <api>1.0.0</api>
+  <release>1.0.1</release>
+  <api>1.0.1</api>
  </version>
  <stability>
   <release>stable</release>
@@ -22,9 +22,7 @@
  </stability>
  <license>PHP License</license>
  <notes><![CDATA[
-  - fixed all reported bugs, mostly in test
-  - rrd_version() added
-  - better tests
+  - fixed broken pecl installation #22644
   ]]>
  </notes>
  <contents>
@@ -85,6 +83,21 @@
  <providesextension>rrd</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.0.1</release>
+    <api>1.0.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - fixed broken pecl installation #22644
+  ]]>
+   </notes>
+   <date>2011-04-16</date>
+  </release>
   <release>
    <version>
     <release>1.0.0</release>
