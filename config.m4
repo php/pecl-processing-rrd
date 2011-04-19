@@ -69,10 +69,10 @@ dnl Finish the setup
     [],[
       AC_MSG_ERROR([wrong rrd lib version or lib not found])
     ],[
-      -L$RRDTOOL_LIBDIR -ldl
+      -L$RRDTOOL_LIBDIR
     ])
   ],[
-    -L$RRDTOOL_LIBDIR -ldl
+    -L$RRDTOOL_LIBDIR
   ])
 
   dnl rrd_graph_v is available in 1.3.0+
