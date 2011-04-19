@@ -11,10 +11,10 @@
   <active>yes</active>
  </lead>
  <!-- latest release information -->
- <date>2011-04-16</date>
+ <date>2011-04-19</date>
  <version>
-  <release>1.0.1</release>
-  <api>1.0.1</api>
+  <release>1.0.2</release>
+  <api>1.0.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -22,7 +22,7 @@
  </stability>
  <license>PHP License</license>
  <notes><![CDATA[
-  - fixed broken pecl installation #22644
+  - fixed broken installation on FreeBSD #22651
   ]]>
  </notes>
  <contents>
@@ -83,6 +83,21 @@
  <providesextension>rrd</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.0.2</release>
+    <api>1.0.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - fixed broken installation on FreeBSD #22651
+  ]]>
+   </notes>
+   <date>2011-04-19</date>
+  </release>
   <release>
    <version>
     <release>1.0.1</release>
