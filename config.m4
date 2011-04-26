@@ -57,22 +57,18 @@ if test "$PHP_RRD" != "no"; then
     fi
   fi
 
-dnl Finish the setup
+  dnl Finish the setup
 
-  RRD_H_PATH="$RRDTOOL_INCDIR/rrd.h"
-  PHP_RRDTOOL_DIR=$RRDTOOL_DIR
   PHP_ADD_INCLUDE($RRDTOOL_INCDIR)
 
   PHP_CHECK_LIBRARY(rrd, rrd_create,
-  [],[
-    PHP_CHECK_LIBRARY(rrd, rrd_create,
-    [],[
-      AC_MSG_ERROR([wrong rrd lib version or lib not found])
-    ],[
-      -L$RRDTOOL_LIBDIR
-    ])
-  ],[
-    -L$RRDTOOL_LIBDIR
+  [
+    PHP_ADD_LIBRARY_WITH_PATH(rrd, $RRDTOOL_LIBDIR, RRD_SHARED_LIBADD)
+    AC_DEFINE(HAVE_RRDTOOL, 1, [ ])
+  ], [
+    AC_MSG_ERROR([wrong rrd lib version or lib not found])
+  ], [
+    -L$RRDTOOL_LIBDIR -lrrd
   ])
 
   dnl rrd_graph_v is available in 1.3.0+
@@ -84,9 +80,6 @@ dnl Finish the setup
   dnl rrd_lastupdate_r available in 1.4.0+
   PHP_CHECK_FUNC(rrd_lastupdate_r, rrd)
 
-  PHP_ADD_LIBRARY_WITH_PATH(rrd, $RRDTOOL_LIBDIR, RRD_SHARED_LIBADD)
-
-  PHP_NEW_EXTENSION(rrd, rrd.c rrd_graph.c rrd_create.c rrd_update.c rrd_info.c, $ext_shared)
   PHP_SUBST(RRD_SHARED_LIBADD)
-  AC_DEFINE(HAVE_RRDTOOL, 1, [ ])
+  PHP_NEW_EXTENSION(rrd, rrd.c rrd_graph.c rrd_create.c rrd_update.c rrd_info.c, $ext_shared)
 fi
