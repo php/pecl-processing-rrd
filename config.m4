@@ -71,6 +71,10 @@ if test "$PHP_RRD" != "no"; then
     -L$RRDTOOL_LIBDIR -lrrd
   ])
 
+  dnl save temporary LDFLAGS, necessary for PHP_CHECK_FUNC
+  old_LDFLAGS=$LDFLAGS
+  LDFLAGS="$LDFLAGS -L$RRDTOOL_LIBDIR"
+
   dnl rrd_graph_v is available in 1.3.0+
   PHP_CHECK_FUNC(rrd_graph_v, rrd)
   if test "$ac_cv_func_rrd_graph_v" != yes; then
@@ -80,6 +84,8 @@ if test "$PHP_RRD" != "no"; then
   dnl rrd_lastupdate_r available in 1.4.0+
   PHP_CHECK_FUNC(rrd_lastupdate_r, rrd)
 
-  PHP_SUBST(RRD_SHARED_LIBADD)
+  LDFLAGS=$old_LDFLAGS
+
   PHP_NEW_EXTENSION(rrd, rrd.c rrd_graph.c rrd_create.c rrd_update.c rrd_info.c, $ext_shared)
+  PHP_SUBST(RRD_SHARED_LIBADD)
 fi
