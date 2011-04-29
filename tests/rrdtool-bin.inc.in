@@ -1,0 +1,6 @@
+<?php
+$rrdtool_bin = "@RRDTOOL_BIN@";
+if ($rrdtool_bin == "no") {
+	die("skip rrdtool binary isn't defined");
+}
+?>
