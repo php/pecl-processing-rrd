@@ -90,13 +90,18 @@ static zend_object_value rrd_create_object_new(zend_class_entry *ce TSRMLS_DC)
 	intern_obj->zv_arr_data_sources = NULL;
 	intern_obj->zv_arr_archives = NULL;
 
+#if ZEND_MODULE_API_NO  >= 20100409
+	object_properties_init(&intern_obj->std, ce);
+#else
 	zend_hash_copy(intern_obj->std.properties, &ce->default_properties,
 		(copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval*)
 	);
+#endif
 
 	retval.handle = zend_objects_store_put(intern_obj,
 		(zend_objects_store_dtor_t)zend_objects_destroy_object,
-		rrd_create_object_dtor, NULL TSRMLS_CC
+		(zend_objects_free_object_storage_t)rrd_create_object_dtor,
+		NULL TSRMLS_CC
 	);
 
 	retval.handlers = &rrd_create_handlers;

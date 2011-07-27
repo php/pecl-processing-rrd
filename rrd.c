@@ -541,7 +541,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ */
-static function_entry rrd_functions[] = {
+static zend_function_entry rrd_functions[] = {
 	PHP_FE(rrd_update, arginfo_rrd_update)
 	PHP_FE(rrd_create, arginfo_rrd_create)
 	PHP_FE(rrd_graph, arginfo_rrd_graph)
