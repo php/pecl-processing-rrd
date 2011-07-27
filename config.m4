@@ -10,7 +10,7 @@ AC_ARG_WITH(rrd-binary,
 [AC_PATH_PROG(RRDTOOL_BIN, rrdtool, no, $PATH)])
 
 AC_SUBST(RRDTOOL_BIN)
-if test -d $srcdir/tests; then
+if test -f $srcdir/tests/rrdtool-bin.inc.in; then
   AC_OUTPUT(tests/rrdtool-bin.inc)
   AC_OUTPUT(tests/data/Makefile)
 fi
