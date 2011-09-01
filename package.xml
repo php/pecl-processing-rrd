@@ -11,10 +11,10 @@
   <active>yes</active>
  </lead>
  <!-- latest release information -->
- <date>2011-04-29</date>
+ <date>2011-08-12</date>
  <version>
-  <release>1.0.3</release>
-  <api>1.0.3</api>
+  <release>1.0.4</release>
+  <api>1.0.4</api>
  </version>
  <stability>
   <release>stable</release>
@@ -22,7 +22,7 @@
  </stability>
  <license>PHP License</license>
  <notes><![CDATA[
-  - fixed installation for libs outside LDFLAGS #22666
+  - can be used with 5.4/trunk #22836
   ]]>
  </notes>
  <contents>
@@ -83,6 +83,21 @@
  <providesextension>rrd</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.0.4</release>
+    <api>1.0.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - can be used with 5.4/trunk #22836
+  ]]>
+   </notes>
+   <date>2011-08-12</date>
+  </release>
   <release>
    <version>
     <release>1.0.3</release>
