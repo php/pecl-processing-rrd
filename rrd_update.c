@@ -261,20 +261,24 @@ PHP_FUNCTION(rrd_update)
 }
 /* }}} */
 
-/* arguments */
-ZEND_BEGIN_ARG_INFO(arginfo_construct, 0)
+/* Arguments
+ * it's necessary to use unique name e.g. arginfo_rrdcreator_construct because
+ * in PHP < 5.3 ZEND_BEGIN_ARG_INFO_EX doesn't declare arginfo structure as
+ * static
+ */
+ZEND_BEGIN_ARG_INFO(arginfo_rrdupdater_construct, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_update, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_rrdupdater_update, 0, 0, 1)
 	ZEND_ARG_INFO(0, values)
 	ZEND_ARG_INFO(0, time)
 ZEND_END_ARG_INFO()
 
 /* class method table */
 static zend_function_entry rrd_update_methods[] = {
-	PHP_ME(RRDUpdater, __construct, arginfo_construct, ZEND_ACC_PUBLIC)
-	PHP_ME(RRDUpdater, update, arginfo_update, ZEND_ACC_PUBLIC)
+	PHP_ME(RRDUpdater, __construct, arginfo_rrdupdater_construct, ZEND_ACC_PUBLIC)
+	PHP_ME(RRDUpdater, update, arginfo_rrdupdater_update, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 

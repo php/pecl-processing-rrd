@@ -334,23 +334,27 @@ PHP_FUNCTION(rrd_create)
 }
 /* }}} */
 
-/* arguments */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_construct, 0, 0, 1)
+/* Arguments
+ * it's necessary to use unique name e.g. arginfo_rrdcreator_construct because
+ * in PHP < 5.3 ZEND_BEGIN_ARG_INFO_EX doesn't declare arginfo structure as
+ * static
+ */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_rrdcreator_construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, startTime)
 	ZEND_ARG_INFO(0, step)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_description, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_rrdcreator_description, 0, 0, 1)
 	ZEND_ARG_INFO(0, description)
 ZEND_END_ARG_INFO()
 
 /* class method table */
 static zend_function_entry rrd_create_methods[] = {
-	PHP_ME(RRDCreator, __construct, arginfo_construct, ZEND_ACC_PUBLIC)
+	PHP_ME(RRDCreator, __construct, arginfo_rrdcreator_construct, ZEND_ACC_PUBLIC)
 	PHP_ME(RRDCreator, save, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(RRDCreator, addDataSource, arginfo_description, ZEND_ACC_PUBLIC)
-	PHP_ME(RRDCreator, addArchive, arginfo_description, ZEND_ACC_PUBLIC)
+	PHP_ME(RRDCreator, addDataSource, arginfo_rrdcreator_description, ZEND_ACC_PUBLIC)
+	PHP_ME(RRDCreator, addArchive, arginfo_rrdcreator_description, ZEND_ACC_PUBLIC)
 	{NULL, NULL, NULL}
 };
 
