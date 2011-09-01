@@ -22,9 +22,4 @@
 void rrd_create_minit(TSRMLS_DC);
 PHP_FUNCTION(rrd_create);
 
-ZEND_BEGIN_ARG_INFO(arginfo_rrd_create, 0)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
 #endif  /* RRD_CREATE_H */

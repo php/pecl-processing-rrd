@@ -22,9 +22,4 @@
 extern void rrd_graph_minit(TSRMLS_DC);
 extern PHP_FUNCTION(rrd_graph);
 
-ZEND_BEGIN_ARG_INFO(arginfo_rrd_graph, 0)
-	ZEND_ARG_INFO(0, file)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
 #endif  /* RRD_GRAPH_H */

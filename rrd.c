@@ -538,6 +538,25 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_version, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_rrd_info, 0)
+	ZEND_ARG_INFO(0, file)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_rrd_graph, 0)
+	ZEND_ARG_INFO(0, file)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_rrd_create, 0)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_rrd_update, 0)
+	ZEND_ARG_INFO(0, file)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ */

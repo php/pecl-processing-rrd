@@ -21,10 +21,6 @@
 
 extern PHP_FUNCTION(rrd_info);
 
-ZEND_BEGIN_ARG_INFO(arginfo_rrd_info, 0)
-	ZEND_ARG_INFO(0, file)
-ZEND_END_ARG_INFO()
-
 /* necessary, because rrd_info_t definition is needed for function definition */
 #include <rrd.h>
 extern uint rrd_info_toarray(const rrd_info_t *rrd_info_data, zval *array TSRMLS_DC);

@@ -22,9 +22,4 @@
 void rrd_update_minit(TSRMLS_DC);
 PHP_FUNCTION(rrd_update);
 
-ZEND_BEGIN_ARG_INFO(arginfo_rrd_update, 0)
-	ZEND_ARG_INFO(0, file)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
 #endif  /* RRD_UPDATE_H */
