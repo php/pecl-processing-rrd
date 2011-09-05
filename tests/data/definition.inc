@@ -5,5 +5,7 @@ $data_updatedDb = "$data_dir/speed.rrd";
 $data_graphDb = "$data_dir/speed.png";
 $data_xmdDbdump = "$data_dir/speed-dump.xml";
 $data_updaterTxt = "$data_dir/rrd_updater_fetch.txt";
+$data_moreDSEmptyDb = "$data_dir/moreDS-empty.rrd";
+$data_moreDSUpdaterTxt = "$data_dir/moreDS_updater_fetch.txt";
 $data_moreDSDb = "$data_dir/moreDS.rrd";
 $data_moreDSDb_fetched = "$data_dir/moreDS_fetch.txt";

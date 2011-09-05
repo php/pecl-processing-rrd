@@ -165,19 +165,26 @@ PHP_METHOD(RRDUpdater, update)
 		char *ds_name;
 		zval **ds_val;
 
-		if (ds_names.len) smart_str_appendc(&ds_names, ':');
-		else smart_str_appends(&ds_names,"--template=");
+		if (ds_names.len) {
+			smart_str_appendc(&ds_names, ':');
+		} else {
+			smart_str_appends(&ds_names, "--template=");
+		}
 
 		zend_hash_get_current_key(Z_ARRVAL_P(zv_values_array), &ds_name, NULL, 0);
 		smart_str_appends(&ds_names, ds_name);
 
-		/* "timestamp:value" string */
-		smart_str_appends(&ds_vals, time);
+		/* "timestamp:ds1Value:ds2Value" string */
+		if (!ds_vals.len) {
+			smart_str_appends(&ds_vals, time);
+		}
 		smart_str_appendc(&ds_vals, ':');
 		zend_hash_get_current_data(Z_ARRVAL_P(zv_values_array), (void**) &ds_val);
 		if (Z_TYPE_PP(ds_val) != IS_STRING)
 			convert_to_string(*ds_val);
 		smart_str_appendl(&ds_vals, Z_STRVAL_PP(ds_val), Z_STRLEN_PP(ds_val));
+
+		zend_hash_move_forward(Z_ARRVAL_P(zv_values_array));
 	};
 
 	smart_str_0(&ds_names);

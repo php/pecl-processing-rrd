@@ -6,7 +6,7 @@
 #
 rrd_binary = @RRDTOOL_BIN@
 
-all: speed.png rrd_updater_fetch.txt speed-dump.xml moreDS_fetch.txt
+all: speed.png rrd_updater_fetch.txt speed-dump.xml moreDS-empty.rrd moreDS_fetch.txt
 	@echo 'You can run "make test"'
 
 clean:
@@ -41,6 +41,19 @@ rrd_updater_fetch.txt: speed.rrd
 
 speed-dump.xml: speed.rrd
 	$(rrd_binary) dump speed.rrd >speed-dump.xml
+
+moreDS-empty.rrd:
+	$(rrd_binary) create moreDS-empty.rrd --start 920804400 \
+		DS:speed1:COUNTER:600:U:U \
+		DS:speed2:COUNTER:600:U:U \
+		RRA:AVERAGE:0.5:1:24 \
+		RRA:AVERAGE:0.5:6:10
+	cp moreDS-empty.rrd moreDS-updater.rrd
+	$(rrd_binary) update moreDS-updater.rrd \
+		920804700:12345:11340 920805000:12357:11357 920805300:12363:11363
+	$(rrd_binary) fetch moreDS-updater.rrd AVERAGE \
+		--start 920804400 --end 920808000 >moreDS_updater_fetch.txt
+	rm moreDS-updater.rrd
 
 moreDS.rrd:
 	$(rrd_binary) create moreDS.rrd --start 920804400 \
