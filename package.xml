@@ -11,18 +11,21 @@
   <active>yes</active>
  </lead>
  <!-- latest release information -->
- <date>2011-08-12</date>
+ <date>2011-09-27</date>
  <version>
-  <release>1.0.4</release>
-  <api>1.0.4</api>
+  <release>1.0.5RC1</release>
+  <api>1.0.5</api>
  </version>
  <stability>
-  <release>stable</release>
+  <release>beta</release>
   <api>stable</api>
  </stability>
  <license>PHP License</license>
  <notes><![CDATA[
-  - can be used with 5.4/trunk #22836
+  - config.m4 - lib searching rewritten, better support across architectures #22683
+  - RRDUpdater - multiple DS doesnt' work #23579
+  - better support for compiling under 5.2.x #22719
+  - small manual fixes
   ]]>
  </notes>
  <contents>
@@ -61,6 +64,7 @@
      <file role="test" name="rrd_018.phpt" />
      <file role="test" name="rrd_019.phpt" />
      <file role="test" name="rrd_020.phpt" />
+     <file role="test" name="rrd_021.phpt" />
      <file role="test" name="rrdtool-bin.inc.in" />
      <file role="test" name="skipif.inc" />
      <dir name="data">
@@ -83,6 +87,24 @@
  <providesextension>rrd</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.0.5RC1</release>
+    <api>1.0.5</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - config.m4 - lib searching rewritten, better support across architectures #22683
+  - RRDUpdater - multiple DS doesnt' work #23579
+  - better support for compiling under 5.2.x #22719
+  - small manual fixes
+  ]]>
+   </notes>
+   <date>2011-09-27</date>
+  </release>
   <release>
    <version>
     <release>1.0.4</release>
