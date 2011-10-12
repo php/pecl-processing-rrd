@@ -19,7 +19,7 @@
 #ifndef RRD_UPDATE_H
 #define RRD_UPDATE_H
 
-void rrd_update_minit(TSRMLS_DC);
+void rrd_update_minit(TSRMLS_D);
 PHP_FUNCTION(rrd_update);
 
 #endif  /* RRD_UPDATE_H */

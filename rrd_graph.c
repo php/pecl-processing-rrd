@@ -319,7 +319,7 @@ PHP_METHOD(RRDGraph, saveVerbose)
 
 	/* making return array */
 	array_init(return_value);
-	rrd_info_toarray(rrd_info_data, return_value);
+	rrd_info_toarray(rrd_info_data, return_value TSRMLS_CC);
 
 	rrd_info_free(rrd_info_data);
 	rrd_args_free(graph_argv);
@@ -413,7 +413,7 @@ static zend_function_entry rrd_graph_methods[] = {
 };
 
 /* minit hook, called from main module minit */
-void rrd_graph_minit(TSRMLS_DC)
+void rrd_graph_minit(TSRMLS_D)
 {
 	zend_class_entry ce;
 	INIT_CLASS_ENTRY(ce, "RRDGraph", rrd_graph_methods);

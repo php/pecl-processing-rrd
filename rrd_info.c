@@ -60,7 +60,7 @@ PHP_FUNCTION(rrd_info)
 
 	/* making return array*/
 	array_init(return_value);
-	rrd_info_toarray(rrd_info_data, return_value);
+	rrd_info_toarray(rrd_info_data, return_value TSRMLS_CC);
 	rrd_info_free(rrd_info_data);
 }
 /* }}} */

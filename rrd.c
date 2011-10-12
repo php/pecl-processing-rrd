@@ -585,9 +585,9 @@ static zend_function_entry rrd_functions[] = {
 /* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(rrd)
 {
-	rrd_graph_minit(TSRMLS_CC);
-	rrd_create_minit(TSRMLS_CC);
-	rrd_update_minit(TSRMLS_CC);
+	rrd_graph_minit(TSRMLS_C);
+	rrd_create_minit(TSRMLS_C);
+	rrd_update_minit(TSRMLS_C);
 	return SUCCESS;
 }
 /* }}} */

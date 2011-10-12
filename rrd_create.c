@@ -359,7 +359,7 @@ static zend_function_entry rrd_create_methods[] = {
 };
 
 /* minit hook, called from main module minit */
-void rrd_create_minit(TSRMLS_DC)
+void rrd_create_minit(TSRMLS_D)
 {
 	zend_class_entry ce;
 	INIT_CLASS_ENTRY(ce, "RRDCreator", rrd_create_methods);

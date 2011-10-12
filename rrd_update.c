@@ -290,7 +290,7 @@ static zend_function_entry rrd_update_methods[] = {
 };
 
 /* minit hook, called from main module minit */
-void rrd_update_minit(TSRMLS_DC)
+void rrd_update_minit(TSRMLS_D)
 {
 	zend_class_entry ce;
 	INIT_CLASS_ENTRY(ce, "RRDUpdater", rrd_update_methods);
