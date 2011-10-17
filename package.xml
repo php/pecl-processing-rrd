@@ -13,7 +13,7 @@
  <!-- latest release information -->
  <date>2011-09-27</date>
  <version>
-  <release>1.0.5RC1</release>
+  <release>1.0.5RC2</release>
   <api>1.0.5</api>
  </version>
  <stability>
@@ -21,11 +21,8 @@
   <api>stable</api>
  </stability>
  <license>PHP License</license>
- <notes><![CDATA[
-  - config.m4 - lib searching rewritten, better support across architectures #22683
-  - RRDUpdater - multiple DS doesnt' work #23579
-  - better support for compiling under 5.2.x #22719
-  - small manual fixes
+  <notes><![CDATA[
+  - zts build fixed #59992
   ]]>
  </notes>
  <contents>
@@ -87,6 +84,21 @@
  <providesextension>rrd</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.0.5RC2</release>
+    <api>1.0.5</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - zts build fixed #59992
+  ]]>
+   </notes>
+   <date>2011-10-17</date>
+  </release>
   <release>
    <version>
     <release>1.0.5RC1</release>
