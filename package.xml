@@ -11,7 +11,7 @@
   <active>yes</active>
  </lead>
  <!-- latest release information -->
- <date>2011-11-15</date>
+ <date>2011-11-16</date>
  <version>
   <release>1.0.5</release>
   <api>1.0.5</api>
@@ -97,7 +97,7 @@
   - license changed to the BSD license
   ]]>
    </notes>
-   <date>2011-11-15</date>
+   <date>2011-11-16</date>
   </release>
   <release>
    <version>
