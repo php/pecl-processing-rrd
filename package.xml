@@ -11,10 +11,10 @@
   <active>yes</active>
  </lead>
  <!-- latest release information -->
- <date>2011-11-16</date>
+ <date>2012-06-04</date>
  <version>
-  <release>1.0.5</release>
-  <api>1.0.5</api>
+  <release>1.1.0</release>
+  <api>1.1.0</api>
  </version>
  <stability>
   <release>stable</release>
@@ -22,7 +22,7 @@
  </stability>
  <license>BSD</license>
   <notes><![CDATA[
-  - license changed to the BSD license
+  - bug with multiple data sources in rrd_lastupdate - BC break #61316
   ]]>
  </notes>
  <contents>
@@ -84,6 +84,21 @@
  <providesextension>rrd</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.1.0</release>
+    <api>1.1.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - bug with multiple data sources in rrd_lastupdate - BC break #61316
+  ]]>
+   </notes>
+   <date>2012-06-04</date>
+  </release>
   <release>
    <version>
     <release>1.0.5</release>
