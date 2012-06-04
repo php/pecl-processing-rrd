@@ -218,7 +218,7 @@ PHP_FUNCTION(rrd_lastupdate)
 {
 	char *filename;
 	int filename_length;
-	/* list of arguments for rrd_lastupdate call, it's more efficient then u
+	/* list of arguments for rrd_lastupdate call, it's more efficient then
 	 * usage of rrd_args, because there isn't array of arguments in parameters
 	 */
 	char *argv[3];
@@ -285,17 +285,12 @@ PHP_FUNCTION(rrd_lastupdate)
 		MAKE_STD_ZVAL(zv_data_array);
 		array_init(zv_data_array);
 
+		/* simple array for "data" is enough, data source names and timestamps are
+		 * available under other return value keys
+		 */
 		for (i = 0; i < ds_cnt; i++) {
-			/* last_update is key in data array */
-			zval *zv_timestamp;
-			MAKE_STD_ZVAL(zv_timestamp);
-			ZVAL_LONG(zv_timestamp, last_update);
-			convert_to_string(zv_timestamp);
-
-			add_assoc_string(zv_data_array, Z_STRVAL_P(zv_timestamp), last_ds[i], 1);
-
+			add_next_index_string(zv_data_array, last_ds[i], 1);
 			free(last_ds[i]);
-			zval_dtor(zv_timestamp);
 		}
 		free(last_ds);
 		add_assoc_zval(return_value, "data", zv_data_array);
