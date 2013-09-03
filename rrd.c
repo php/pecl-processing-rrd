@@ -134,6 +134,7 @@ PHP_FUNCTION(rrd_fetch)
 				zend_hash_move_forward(Z_ARRVAL_P(zv_data_array));
 
 				zval_dtor(zv_timestamp);
+				efree(zv_timestamp);
 			}
 		}
 		add_assoc_zval(return_value, "data", zv_data_array);
