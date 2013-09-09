@@ -29,7 +29,7 @@ array(3) {
   ["xsize"]=>
   int(497)
   ["ysize"]=>
-  int(148)
+  int(%d)
   ["calcpr"]=>
   NULL
 }

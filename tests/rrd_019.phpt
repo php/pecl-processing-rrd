@@ -34,7 +34,7 @@ array(10) {
   ["graph_left"]=>
   int(67)
   ["graph_top"]=>
-  int(22)
+  int(%d)
   ["graph_width"]=>
   int(400)
   ["graph_height"]=>
@@ -42,7 +42,7 @@ array(10) {
   ["image_width"]=>
   int(497)
   ["image_height"]=>
-  int(148)
+  int(%d)
   ["graph_start"]=>
   int(920804400)
   ["graph_end"]=>
