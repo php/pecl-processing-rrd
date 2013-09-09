@@ -31,7 +31,7 @@ PHP_FUNCTION(rrd_info)
 	 */
 	char *argv[3];
 	/* return value from rrd_info_r() */
-	rrd_info_t *rrd_info_data, *data_p;
+	rrd_info_t *rrd_info_data;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename,
 		&filename_length) == FAILURE) {
@@ -82,7 +82,7 @@ uint rrd_info_toarray(const rrd_info_t *rrd_info_data, zval *array TSRMLS_DC)
 			add_assoc_string(array, data_p->key, data_p->value.u_str, 1);
 			break;
 		case RD_I_BLO:
-			add_assoc_stringl(array, data_p->key, data_p->value.u_blo.ptr,
+			add_assoc_stringl(array, data_p->key, (char *)data_p->value.u_blo.ptr,
 				 data_p->value.u_blo.size, 1);
 			break;
 		}

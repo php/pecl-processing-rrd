@@ -62,7 +62,9 @@ static zend_object_value rrd_graph_object_new(zend_class_entry *ce TSRMLS_DC)
 {
 	rrd_graph_object *intern_obj;
 	zend_object_value retval;
+#if ZEND_MODULE_API_NO  < 20100409
 	zval *tmp;
+#endif
 
 	intern_obj = ecalloc(1, sizeof(*intern_obj));
 	zend_object_std_init(&intern_obj->std, ce TSRMLS_CC);
@@ -280,7 +282,7 @@ PHP_METHOD(RRDGraph, saveVerbose)
 {
 	rrd_graph_object *intern_obj = (rrd_graph_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 	/* return value from rrd_graphv */
-	rrd_info_t *rrd_info_data, *data_p;
+	rrd_info_t *rrd_info_data;
 
 	/* arguments for rrd_graph call */
 	rrd_args *graph_argv;

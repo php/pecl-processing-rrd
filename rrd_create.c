@@ -71,7 +71,9 @@ static zend_object_value rrd_create_object_new(zend_class_entry *ce TSRMLS_DC)
 {
 	rrd_create_object *intern_obj;
 	zend_object_value retval;
+#if ZEND_MODULE_API_NO  < 20100409
 	zval *tmp;
+#endif
 
 	intern_obj = ecalloc(1, sizeof(*intern_obj));
 	zend_object_std_init(&intern_obj->std, ce TSRMLS_CC);
