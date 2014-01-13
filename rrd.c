@@ -30,7 +30,7 @@ clear error buffer also.
 */
 PHP_FUNCTION(rrd_error)
 {
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "") == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -481,11 +481,27 @@ PHP_FUNCTION(rrd_xport)
 }
 /* }}} */
 
+/* {{{ proto void rrdc_disconnect()
+ * Close any outstanding connection to rrd cache daemon.
+ */
+PHP_FUNCTION(rrdc_disconnect)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	rrdc_disconnect();
+}
+
 /* {{{ proto string rrd_version()
  * Gets version of underlying librrd.
  */
 PHP_FUNCTION(rrd_version)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETVAL_STRING(rrd_strversion(), 1);
 }
 
@@ -523,9 +539,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_rrd_xport, 0)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_rrd_version, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO(arginfo_rrd_info, 0)
 	ZEND_ARG_INFO(0, file)
 ZEND_END_ARG_INFO()
@@ -560,7 +573,8 @@ static zend_function_entry rrd_functions[] = {
 	PHP_FE(rrd_restore, arginfo_rrd_restore)
 	PHP_FE(rrd_tune, arginfo_rrd_tune)
 	PHP_FE(rrd_xport, arginfo_rrd_xport)
-	PHP_FE(rrd_version, arginfo_rrd_version)
+	PHP_FE(rrdc_disconnect, NULL)
+	PHP_FE(rrd_version, NULL)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -590,13 +604,23 @@ static PHP_MINFO_FUNCTION(rrd)
 }
 /* }}} */
 
+
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
+static PHP_MSHUTDOWN_FUNCTION(rrd)
+{
+	/* ensure that any connection to rrd cache deamon will be closed */
+	rrdc_disconnect();
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ rrd module_entry */
 zend_module_entry rrd_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"rrd",
 	rrd_functions,
 	PHP_MINIT(rrd),
-	NULL, /* PHP_MSHUTDOWN(rrd) */
+	PHP_MSHUTDOWN(rrd),
 	NULL, /* PHP_RINIT(rrd) */
 	NULL, /* PHP_RSHUTDOWN(rrd) */
 	PHP_MINFO(rrd),

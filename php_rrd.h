@@ -20,6 +20,10 @@ extern zend_module_entry rrd_module_entry;
 #include "TSRM.h"
 #endif
 
+#ifndef zend_parse_parameters_none
+# define zend_parse_parameters_none() zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")
+#endif 
+
 typedef struct _rrd_args {
 	int count;
 	char **args;
