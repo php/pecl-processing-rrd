@@ -67,6 +67,9 @@ if test "$PHP_RRD" != "no"; then
   dnl rrd_lastupdate_r available in 1.4.0+
   PHP_CHECK_FUNC(rrd_lastupdate_r, rrd)
 
+  dnl rrd_disconnect available in 1.4.0+
+  PHP_CHECK_FUNC(rrd_disconnect, rrd)
+
   LDFLAGS=$old_LDFLAGS
 
   PHP_NEW_EXTENSION(rrd, rrd.c rrd_graph.c rrd_create.c rrd_update.c rrd_info.c, $ext_shared)

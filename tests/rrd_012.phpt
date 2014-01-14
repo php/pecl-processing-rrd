@@ -11,6 +11,8 @@ if (!file_exists($data_updatedDb)) {
 --FILE--
 <?php
 include('data/definition.inc');
+putenv('LANG=C');
+setlocale(LC_ALL, 'C');
 var_dump($info = rrd_info($data_updatedDb));
 var_dump($info["filename"] == $data_updatedDb);
 ?>
