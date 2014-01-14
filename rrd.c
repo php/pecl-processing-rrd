@@ -481,7 +481,7 @@ PHP_FUNCTION(rrd_xport)
 }
 /* }}} */
 
-#ifdef HAVE_RRD_DISCONNECT
+#ifdef HAVE_RRDC_DISCONNECT
 /* {{{ proto void rrdc_disconnect()
  * Close any outstanding connection to rrd cache daemon.
  */
@@ -575,7 +575,7 @@ static zend_function_entry rrd_functions[] = {
 	PHP_FE(rrd_restore, arginfo_rrd_restore)
 	PHP_FE(rrd_tune, arginfo_rrd_tune)
 	PHP_FE(rrd_xport, arginfo_rrd_xport)
-#ifdef HAVE_RRD_DISCONNECT
+#ifdef HAVE_RRDC_DISCONNECT
 	PHP_FE(rrdc_disconnect, NULL)
 #endif
 	PHP_FE(rrd_version, NULL)
@@ -613,7 +613,7 @@ static PHP_MINFO_FUNCTION(rrd)
 static PHP_MSHUTDOWN_FUNCTION(rrd)
 {
 	/* ensure that any connection to rrd cache deamon will be closed */
-#ifdef HAVE_RRD_DISCONNECT
+#ifdef HAVE_RRDC_DISCONNECT
 	rrdc_disconnect();
 #endif
 	return SUCCESS;

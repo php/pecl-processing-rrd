@@ -67,8 +67,8 @@ if test "$PHP_RRD" != "no"; then
   dnl rrd_lastupdate_r available in 1.4.0+
   PHP_CHECK_FUNC(rrd_lastupdate_r, rrd)
 
-  dnl rrd_disconnect available in 1.4.0+
-  PHP_CHECK_FUNC(rrd_disconnect, rrd)
+  dnl rrdc_disconnect available in 1.4.0+
+  PHP_CHECK_FUNC(rrdc_disconnect, rrd)
 
   LDFLAGS=$old_LDFLAGS
 
