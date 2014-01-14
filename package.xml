@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.7.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+ <name>rrd</name>
+ <channel>pecl.php.net</channel>
+ <summary>PHP bindings to rrd tool system</summary>
+ <description>Procedural and simple OO wrapper for rrdtool - data logging and graphing system for time series data.</description>
+ <lead>
+  <name>Miroslav Kubelik</name>
+  <user>koubel</user>
+  <email>koubel@php.net</email>
+  <active>yes</active>
+ </lead>
+ <!-- latest release information -->
+ <date>2014-01-14</date>
+ <version>
+  <release>1.1.2</release>
+  <api>1.1.2</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license>BSD</license>
+  <notes><![CDATA[
+  - closing connection to rrd caching daemon #66088
+  - better documentation for RRDGraph::setOptions #65756
+  ]]>
+ </notes>
+ <contents>
+  <dir name="/">
+   <file name="rrd_info.c" role="src" />
+   <file name="rrd_info.h" role="src" />
+   <file name="rrd_graph.c" role="src" />
+   <file name="rrd_graph.h" role="src" />
+   <file name="rrd.c" role="src" />
+   <file name="php_rrd.h" role="src" />
+   <file name="config.m4" role="src" />
+   <file name="rrd_update.c" role="src" />
+   <file name="rrd_update.h" role="src" />
+   <file name="rrd_create.h" role="src" />
+   <file name="rrd_create.c" role="src" />
+   <file name="CREDITS" role="doc" />
+   <file name="LICENSE" role="doc" />
+    <dir name="tests">
+     <file role="test" name="rrd_001.phpt" />
+     <file role="test" name="rrd_002.phpt" />
+     <file role="test" name="rrd_003.phpt" />
+     <file role="test" name="rrd_004.phpt" />
+     <file role="test" name="rrd_005.phpt" />
+     <file role="test" name="rrd_006.phpt" />
+     <file role="test" name="rrd_007.phpt" />
+     <file role="test" name="rrd_008.phpt" />
+     <file role="test" name="rrd_009.phpt" />
+     <file role="test" name="rrd_010.phpt" />
+     <file role="test" name="rrd_011.phpt" />
+     <file role="test" name="rrd_012.phpt" />
+     <file role="test" name="rrd_013.phpt" />
+     <file role="test" name="rrd_014.phpt" />
+     <file role="test" name="rrd_015.phpt" />
+     <file role="test" name="rrd_016.phpt" />
+     <file role="test" name="rrd_017.phpt" />
+     <file role="test" name="rrd_018.phpt" />
+     <file role="test" name="rrd_019.phpt" />
+     <file role="test" name="rrd_020.phpt" />
+     <file role="test" name="rrd_021.phpt" />
+     <file role="test" name="rrd_022.phpt" />
+     <file role="test" name="rrdtool-bin.inc.in" />
+     <file role="test" name="skipif.inc" />
+     <dir name="data">
+      <file role="test" name="definition.inc" />
+      <file role="test" name="Makefile.in" />
+     </dir>
+    </dir>
+  </dir>
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.3.2</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <providesextension>rrd</providesextension>
+ <extsrcrelease />
+ <changelog>
+  <release>
+   <version>
+    <release>1.1.2</release>
+    <api>1.1.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - closing connection to rrd caching daemon #66088
+  - better documentation for RRDGraph::setOptions #65756
+  ]]>
+   </notes>
+   <date>2014-01-14</date>
+  </release>
+  <release>
+   <version>
+    <release>1.1.1</release>
+    <api>1.1.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - possible segfault in rrd_fetch
+  ]]>
+   </notes>
+   <date>2013-09-03</date>
+  </release>
+  <release>
+   <version>
+    <release>1.1.0</release>
+    <api>1.1.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - bug with multiple data sources in rrd_lastupdate - BC break #61316
+  ]]>
+   </notes>
+   <date>2012-06-04</date>
+  </release>
+  <release>
+   <version>
+    <release>1.0.5</release>
+    <api>1.0.5</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - license changed to the BSD license
+  ]]>
+   </notes>
+   <date>2011-11-16</date>
+  </release>
+  <release>
+   <version>
+    <release>1.0.5RC2</release>
+    <api>1.0.5</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - zts build fixed #59992
+  ]]>
+   </notes>
+   <date>2011-10-17</date>
+  </release>
+  <release>
+   <version>
+    <release>1.0.5RC1</release>
+    <api>1.0.5</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - config.m4 - lib searching rewritten, better support across architectures #22683
+  - RRDUpdater - multiple DS doesnt' work #23579
+  - better support for compiling under 5.2.x #22719
+  - small manual fixes
+  ]]>
+   </notes>
+   <date>2011-09-27</date>
+  </release>
+  <release>
+   <version>
+    <release>1.0.4</release>
+    <api>1.0.4</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - can be used with 5.4/trunk #22836
+  ]]>
+   </notes>
+   <date>2011-08-12</date>
+  </release>
+  <release>
+   <version>
+    <release>1.0.3</release>
+    <api>1.0.3</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - fixed installation for libs outside LDFLAGS #22666
+  ]]>
+   </notes>
+   <date>2011-04-29</date>
+  </release>
+  <release>
+   <version>
+    <release>1.0.2</release>
+    <api>1.0.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - fixed broken installation on FreeBSD #22651
+  ]]>
+   </notes>
+   <date>2011-04-19</date>
+  </release>
+  <release>
+   <version>
+    <release>1.0.1</release>
+    <api>1.0.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - fixed broken pecl installation #22644
+  ]]>
+   </notes>
+   <date>2011-04-16</date>
+  </release>
+  <release>
+   <version>
+    <release>1.0.0</release>
+    <api>1.0.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - fixed all reported bugs, mostly in test
+  - rrd_version() added
+  - better tests
+  ]]>
+   </notes>
+   <date>2011-04-12</date>
+  </release>
+  <release>
+   <version>
+    <release>0.10.0</release>
+    <api>0.10.0</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>beta</api>
+   </stability>
+   <notes><![CDATA[
+  - fixed all reported bugs
+  - fixed major bug in rrd_fetch #21402
+  - BC break : rdd_fetch returned array format changed, these items doesn't
+   exist anymore - "ds_cnt", "ds_namv"
+  ]]>
+   </notes>
+   <date>2011-03-03</date>
+  </release>
+  <release>
+   <version>
+    <release>0.9.0</release>
+    <api>0.9.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <notes>first official pecl release</notes>
+   <date>2011-01-03</date>
+  </release>
+ </changelog>
+</package>
