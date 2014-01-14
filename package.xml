@@ -11,10 +11,10 @@
   <active>yes</active>
  </lead>
  <!-- latest release information -->
- <date>2013-09-03</date>
+ <date>2014-01-14</date>
  <version>
-  <release>1.1.1</release>
-  <api>1.1.1</api>
+  <release>1.1.2</release>
+  <api>1.1.2</api>
  </version>
  <stability>
   <release>stable</release>
@@ -22,7 +22,8 @@
  </stability>
  <license>BSD</license>
   <notes><![CDATA[
-  - possible segfault in rrd_fetch
+  - closing connection to rrd caching daemon #66088
+  - better documentation for RRDGraph::setOptions #65756
   ]]>
  </notes>
  <contents>
@@ -62,6 +63,7 @@
      <file role="test" name="rrd_019.phpt" />
      <file role="test" name="rrd_020.phpt" />
      <file role="test" name="rrd_021.phpt" />
+     <file role="test" name="rrd_022.phpt" />
      <file role="test" name="rrdtool-bin.inc.in" />
      <file role="test" name="skipif.inc" />
      <dir name="data">
@@ -84,6 +86,22 @@
  <providesextension>rrd</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>1.1.2</release>
+    <api>1.1.2</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - closing connection to rrd caching daemon #66088
+  - better documentation for RRDGraph::setOptions #65756
+  ]]>
+   </notes>
+   <date>2014-01-14</date>
+  </release>
   <release>
    <version>
     <release>1.1.1</release>
