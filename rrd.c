@@ -612,8 +612,8 @@ static PHP_MINFO_FUNCTION(rrd)
 /* {{{ PHP_MSHUTDOWN_FUNCTION */
 static PHP_MSHUTDOWN_FUNCTION(rrd)
 {
-	/* ensure that any connection to rrd cache deamon will be closed */
 #ifdef HAVE_RRDC_DISCONNECT
+	/* ensure that any connection to rrd cache deamon will be closed */
 	rrdc_disconnect();
 #endif
 	return SUCCESS;
