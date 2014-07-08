@@ -12,12 +12,14 @@
 #include "config.h"
 #endif
 
-#include <rrd.h>
 #include "php.h"
-#include "rrd_create.h"
-#include "php_rrd.h"
 #include "zend_exceptions.h"
 #include "ext/standard/php_array.h"
+
+#include <rrd.h>
+
+#include "php_rrd.h"
+#include "rrd_create.h"
 
 /* declare class entry */
 static zend_class_entry *ce_rrd_create;

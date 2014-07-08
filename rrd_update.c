@@ -12,12 +12,14 @@
 #include "config.h"
 #endif
 
-#include <rrd.h>
 #include "php.h"
-#include "php_rrd.h"
-#include "rrd_update.h"
 #include "zend_exceptions.h"
 #include "ext/standard/php_smart_str.h"
+
+#include <rrd.h>
+
+#include "php_rrd.h"
+#include "rrd_update.h"
 
 /* declare class entry */
 static zend_class_entry *ce_rrd_update;
