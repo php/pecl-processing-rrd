@@ -34,6 +34,7 @@
    <file name="rrd.c" role="src" />
    <file name="php_rrd.h" role="src" />
    <file name="config.m4" role="src" />
+   <file name="config.w32" role="src" />
    <file name="rrd_update.c" role="src" />
    <file name="rrd_update.h" role="src" />
    <file name="rrd_create.h" role="src" />
