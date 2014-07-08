@@ -1,0 +1,22 @@
+// vim: ft=javascript:
+
+ARG_WITH("rrd", "whether to enable RRD support", "no");
+
+if ("no" != PHP_RRD) {
+	if (CHECK_LIB("rrdlib.lib;", "rrd", PHP_RRD) &&
+			CHECK_HEADER_ADD_INCLUDE("rrd.h", "CFLAGS_RRD")) {
+
+		/* This leads to mode_t redefinition, but actually it's strange as it
+		seems to be dedicated to perl. */
+		ADD_FLAG("CFLAGS_RRD", "/D PERLPATCHLEVEL=0");
+
+		ADD_FLAG("CFLAGS_RRD", "/D HAVE_RRD_LASTUPDATE_R=1");
+
+		EXTENSION("rrd", "rrd.c rrd_graph.c rrd_create.c rrd_update.c rrd_info.c");
+
+		AC_DEFINE('HAVE_RRD', 1, 'Have RRD library');
+	} else {
+		WARNING("rrd not enabled, libs or headers not found");
+	}
+}
+
