@@ -642,13 +642,14 @@ rrd_args *rrd_args_init_by_phparray(const char *command_name, const char *filena
 	const zval *options TSRMLS_DC)
 {
 	uint i, option_count, args_counter = 2;
+	rrd_args *result;
 
 	if (Z_TYPE_P(options) != IS_ARRAY) return NULL;
 	option_count = zend_hash_num_elements(Z_ARRVAL_P(options));
 	if (!option_count) return NULL;
 	if (!strlen(command_name)) return NULL;
 
-	rrd_args *result = (rrd_args *)emalloc(sizeof(rrd_args));
+	result = (rrd_args *)emalloc(sizeof(rrd_args));
 	/* "dummy" + command_name + filename if presented */
 	result->count = option_count + (strlen(filename) ? 3 : 2);
 	result->args = (char **)safe_emalloc(result->count, sizeof(char *), 0);
