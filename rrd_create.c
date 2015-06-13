@@ -36,73 +36,62 @@ typedef struct _rrd_create_object {
 	/* "--start" parameters in rrd create */
 	char *start_time;
 	/* "--step" parameters in rrd create */
-	zval *zv_step;
+	zval zv_step;
 	/* "DS" parameters in rrd create */
-	zval *zv_arr_data_sources;
+	zval zv_arr_data_sources;
 	/* "RRA" parameters in rrd create */
-	zval *zv_arr_archives;
+	zval zv_arr_archives;
 } rrd_create_object;
+
+/**
+ * fetch our custom object from user space object
+ */
+static inline rrd_create_object *php_rrd_create_fetch_object(zend_object *obj) {
+	return (rrd_create_object *)((char*)(obj) - XtOffsetOf(rrd_create_object, std));
+} 
 
 /* {{{ rrd_create_object_dtor
 close all resources and the memory allocated for our internal object
 */
-static void rrd_create_object_dtor(void *object TSRMLS_DC)
+static void rrd_create_object_dtor(zend_object *object)
 {
-	rrd_create_object *intern_obj = (rrd_create_object *)object;
+	rrd_create_object *intern_obj = php_rrd_create_fetch_object(object);
+	if (!intern_obj) return;
 
 	if (intern_obj->file_path)
 		efree(intern_obj->file_path);
 	if (intern_obj->start_time)
 		efree(intern_obj->start_time);
-	if (intern_obj->zv_step)
-		zval_dtor(intern_obj->zv_step);
-	if (intern_obj->zv_arr_data_sources)
-		zval_dtor(intern_obj->zv_arr_data_sources);
-	if (intern_obj->zv_arr_archives)
-		zval_dtor(intern_obj->zv_arr_archives);
+	if (!Z_ISUNDEF(intern_obj->zv_step))
+		zval_dtor(&intern_obj->zv_step);
+	if (!Z_ISUNDEF(intern_obj->zv_arr_data_sources))
+		zval_dtor(&intern_obj->zv_arr_data_sources);
+	if (!Z_ISUNDEF(intern_obj->zv_arr_archives))
+		zval_dtor(&intern_obj->zv_arr_archives);
 
-	zend_object_std_dtor(&intern_obj->std TSRMLS_CC);
-	efree(intern_obj);
+	zend_object_std_dtor(&intern_obj->std);
 }
 /* }}} */
 
 /* {{{ rrd_create_object_new
 creates new rrd create object
 */
-static zend_object_value rrd_create_object_new(zend_class_entry *ce TSRMLS_DC)
+static zend_object *rrd_create_object_new(zend_class_entry *ce)
 {
-	rrd_create_object *intern_obj;
-	zend_object_value retval;
-#if ZEND_MODULE_API_NO  < 20100409
-	zval *tmp;
-#endif
-
-	intern_obj = ecalloc(1, sizeof(*intern_obj));
-	zend_object_std_init(&intern_obj->std, ce TSRMLS_CC);
-
+	rrd_create_object *intern_obj = ecalloc(1, sizeof(rrd_create_object) + 
+		sizeof(zval) * (ce->default_properties_count - 1));
 	intern_obj->file_path = NULL;
 	intern_obj->start_time = NULL;
-	intern_obj->zv_step = NULL;
-	intern_obj->zv_arr_data_sources = NULL;
-	intern_obj->zv_arr_archives = NULL;
+	ZVAL_UNDEF(&intern_obj->zv_step);
+	ZVAL_UNDEF(&intern_obj->zv_arr_data_sources);
+	ZVAL_UNDEF(&intern_obj->zv_arr_archives);
 
-#if ZEND_MODULE_API_NO  >= 20100409
+	zend_object_std_init(&intern_obj->std, ce);
 	object_properties_init(&intern_obj->std, ce);
-#else
-	zend_hash_copy(intern_obj->std.properties, &ce->default_properties,
-		(copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval*)
-	);
-#endif
 
-	retval.handle = zend_objects_store_put(intern_obj,
-		(zend_objects_store_dtor_t)zend_objects_destroy_object,
-		(zend_objects_free_object_storage_t)rrd_create_object_dtor,
-		NULL TSRMLS_CC
-	);
+	intern_obj->std.handlers = &rrd_create_handlers;
 
-	retval.handlers = &rrd_create_handlers;
-
-	return retval;
+	return &intern_obj->std;
 }
 /* }}} */
 
@@ -119,34 +108,33 @@ PHP_METHOD(RRDCreator, __construct)
 	long step = 0;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|sl", &path, &path_length,
+	if (zend_parse_parameters(argc, "s|sl", &path, &path_length,
 		&start_time, &start_time_length, &step) == FAILURE) {
 		return;
 	}
 
 	if (path_length == 0) {
-		zend_throw_exception(zend_exception_get_default(TSRMLS_C),
-			"path for rrd file cannot be empty string", 0 TSRMLS_CC);
+		zend_throw_exception(NULL,
+			"path for rrd file cannot be empty string", 0);
 		return;
 	}
 
 	if (argc > 1 && start_time_length == 0) {
-		zend_throw_exception(zend_exception_get_default(TSRMLS_C),
-			"startTime cannot be empty string", 0 TSRMLS_CC);
+		zend_throw_exception(NULL,
+			"startTime cannot be empty string", 0);
 		return;
 	}
 	if (argc > 2 && step <= 0) {
-		zend_throw_exception(zend_exception_get_default(TSRMLS_C),
-			"step parameter must be greater then 0", 0 TSRMLS_CC);
+		zend_throw_exception(NULL,
+			"step parameter must be greater then 0", 0);
 		return;
 	}
 
-	intern_obj = (rrd_create_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern_obj = php_rrd_create_fetch_object(Z_OBJ_P(getThis()));
 	intern_obj->file_path = estrdup(path);
 	if (start_time) intern_obj->start_time = estrdup(start_time);
 	if (step) {
-		MAKE_STD_ZVAL(intern_obj->zv_step);
-		ZVAL_LONG(intern_obj->zv_step,step);
+		ZVAL_LONG(&intern_obj->zv_step, step);
 	}
 }
 /* }}} */
@@ -160,28 +148,28 @@ PHP_METHOD(RRDCreator, addDataSource)
 	char *desc, *rrd_source_desc;
 	int desc_length;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &desc, &desc_length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &desc, &desc_length) == FAILURE) {
 		return;
 	}
 
 	if (desc_length == 0) {
-		zend_throw_exception(zend_exception_get_default(TSRMLS_C),
-			"description parameter cannot be empty string", 0 TSRMLS_CC);
+		zend_throw_exception(NULL,
+			"description parameter cannot be empty string", 0);
 		return;
 	}
 
-	intern_obj = (rrd_create_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (!intern_obj->zv_arr_data_sources) {
-		MAKE_STD_ZVAL(intern_obj->zv_arr_data_sources);
-		array_init(intern_obj->zv_arr_data_sources);
+	intern_obj = php_rrd_create_fetch_object(Z_OBJ_P(getThis()));
+
+	if (Z_ISUNDEF(intern_obj->zv_arr_data_sources)) {
+		array_init(&intern_obj->zv_arr_data_sources);
 	}
 
 	rrd_source_desc = emalloc(desc_length + 4);
 	strcpy(rrd_source_desc, "DS:");
 	strcat(rrd_source_desc, desc);
 
-	add_next_index_string(intern_obj->zv_arr_data_sources, rrd_source_desc, 1);
+	add_next_index_string(&intern_obj->zv_arr_data_sources, rrd_source_desc);
 	efree(rrd_source_desc);
 }
 /* }}} */
@@ -195,28 +183,27 @@ PHP_METHOD(RRDCreator, addArchive)
 	char *desc, *rrd_archive_desc;
 	int desc_length;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &desc, &desc_length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &desc, &desc_length) == FAILURE) {
 		return;
 	}
 
 	if (desc_length == 0) {
-		zend_throw_exception(zend_exception_get_default(TSRMLS_C),
-			"description parameter cannot be empty string", 0 TSRMLS_CC);
+		zend_throw_exception(NULL,
+			"description parameter cannot be empty string", 0);
 		return;
 	}
 
-	intern_obj = (rrd_create_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	intern_obj = php_rrd_create_fetch_object(Z_OBJ_P(getThis()));
 
-	if (!intern_obj->zv_arr_archives) {
-		MAKE_STD_ZVAL(intern_obj->zv_arr_archives);
-		array_init(intern_obj->zv_arr_archives);
+	if (Z_ISUNDEF(intern_obj->zv_arr_archives)) {
+		array_init(&intern_obj->zv_arr_archives);
 	}
 
 	rrd_archive_desc = emalloc(desc_length + 5);
 	strcpy(rrd_archive_desc, "RRA:");
 	strcat(rrd_archive_desc, desc);
 
-	add_next_index_string(intern_obj->zv_arr_archives, rrd_archive_desc, 1);
+	add_next_index_string(&intern_obj->zv_arr_archives, rrd_archive_desc);
 	efree(rrd_archive_desc);
 }
 /* }}} */
@@ -226,13 +213,12 @@ PHP_METHOD(RRDCreator, addArchive)
  */
 PHP_METHOD(RRDCreator, save)
 {
-	rrd_create_object *intern_obj = (rrd_create_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
+	rrd_create_object *intern_obj = php_rrd_create_fetch_object(Z_OBJ_P(getThis()));
 	/* help structures for preparing arguments for rrd_create call */
-	zval *zv_create_argv;
+	zval zv_create_argv;
 	rrd_args *create_argv;
 
-	MAKE_STD_ZVAL(zv_create_argv);
-	array_init(zv_create_argv);
+	array_init(&zv_create_argv);
 
 	if (intern_obj->start_time) {
 		const char *prefix = "--start=";
@@ -241,38 +227,35 @@ PHP_METHOD(RRDCreator, save)
 
 		strcpy(start_time_str, prefix);
 		strcat(start_time_str, intern_obj->start_time);
-		add_next_index_string(zv_create_argv, start_time_str, 1);
+		add_next_index_string(&zv_create_argv, start_time_str);
 
 		efree(start_time_str);
 	}
 
-	if (intern_obj->zv_step) {
+	if (!Z_ISUNDEF(intern_obj->zv_step)) {
 		const char *prefix = "--step=";
 		char *start_time_str;
 
-		convert_to_string(intern_obj->zv_step);
-		start_time_str = emalloc(strlen(prefix) + Z_STRLEN_P(intern_obj->zv_step) + 1);
+		convert_to_string(&intern_obj->zv_step);
+		start_time_str = emalloc(strlen(prefix) + Z_STRLEN(intern_obj->zv_step) + 1);
 
 		strcpy(start_time_str, prefix);
-		strcat(start_time_str, Z_STRVAL_P(intern_obj->zv_step));
-		add_next_index_string(zv_create_argv, start_time_str, 1);
+		strcat(start_time_str, Z_STRVAL(intern_obj->zv_step));
+		add_next_index_string(&zv_create_argv, start_time_str);
 
 		/* back to long, doesn't needed, but we are consistent */
-		convert_to_long(intern_obj->zv_step);
+		convert_to_long(&intern_obj->zv_step);
 		efree(start_time_str);
 	}
 
 	/* add array of archive and data source strings into argument list */
-	php_array_merge(Z_ARRVAL_P(zv_create_argv), Z_ARRVAL_P(intern_obj->zv_arr_data_sources),
-		0 TSRMLS_CC);
-	php_array_merge(Z_ARRVAL_P(zv_create_argv), Z_ARRVAL_P(intern_obj->zv_arr_archives),
-		0 TSRMLS_CC);
+	php_array_merge(Z_ARRVAL(zv_create_argv), Z_ARRVAL(intern_obj->zv_arr_data_sources));
+	php_array_merge(Z_ARRVAL(zv_create_argv), Z_ARRVAL(intern_obj->zv_arr_archives));
 
-	create_argv = rrd_args_init_by_phparray("create", intern_obj->file_path,
-		zv_create_argv TSRMLS_CC);
+	create_argv = rrd_args_init_by_phparray("create", intern_obj->file_path, &zv_create_argv);
 	if (!create_argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
-		zval_dtor(zv_create_argv);
+		zval_dtor(&zv_create_argv);
 		RETURN_FALSE;
 	}
 
@@ -280,16 +263,16 @@ PHP_METHOD(RRDCreator, save)
 
 	/* call rrd_create and test if fails */
 	if (rrd_create(create_argv->count - 1, &create_argv->args[1]) == -1) {
-		zval_dtor(zv_create_argv);
+		zval_dtor(&zv_create_argv);
 		rrd_args_free(create_argv);
 
 		/* throw exception with rrd error string */
-		zend_throw_exception(zend_exception_get_default(TSRMLS_C), rrd_get_error(), 0 TSRMLS_CC);
+		zend_throw_exception(NULL, rrd_get_error(), 0);
 		rrd_clear_error();
 		return;
 	}
 
-	zval_dtor(zv_create_argv);
+	zval_dtor(&zv_create_argv);
 	rrd_args_free(create_argv);
 	RETURN_TRUE;
 }
@@ -305,14 +288,14 @@ PHP_FUNCTION(rrd_create)
 	zval *zv_arr_options;
 	rrd_args *argv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa", &filename,
 		&filename_length, &zv_arr_options) == FAILURE) {
 		return;
 	}
 
-	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+	if (php_check_open_basedir(filename)) RETURN_FALSE;
 
-	argv = rrd_args_init_by_phparray("create", filename, zv_arr_options TSRMLS_CC);
+	argv = rrd_args_init_by_phparray("create", filename, zv_arr_options);
 	if (!argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
 		RETURN_FALSE;
@@ -330,11 +313,6 @@ PHP_FUNCTION(rrd_create)
 }
 /* }}} */
 
-/* Arguments
- * it's necessary to use unique name e.g. arginfo_rrdcreator_construct because
- * in PHP < 5.3 ZEND_BEGIN_ARG_INFO_EX doesn't declare arginfo structure as
- * static
- */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_rrdcreator_construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, path)
 	ZEND_ARG_INFO(0, startTime)
@@ -355,13 +333,15 @@ static zend_function_entry rrd_create_methods[] = {
 };
 
 /* minit hook, called from main module minit */
-void rrd_create_minit(TSRMLS_D)
+void rrd_create_minit()
 {
 	zend_class_entry ce;
 	INIT_CLASS_ENTRY(ce, "RRDCreator", rrd_create_methods);
 	ce.create_object = rrd_create_object_new;
-	ce_rrd_create = zend_register_internal_class(&ce TSRMLS_CC);
+	ce_rrd_create = zend_register_internal_class(&ce);
 
 	memcpy(&rrd_create_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	rrd_create_handlers.clone_obj = NULL;
+	rrd_create_handlers.offset = XtOffsetOf(rrd_create_object, std);
+	rrd_create_handlers.free_obj = rrd_create_object_dtor; 
 }

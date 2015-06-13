@@ -12,7 +12,7 @@
 #endif
 
 #include "php.h"
-#include "ext/standard/php_smart_str.h"
+#include "ext/standard/php_smart_string.h"
 #include "ext/standard/php_array.h"
 #include "ext/standard/info.h"
 
@@ -36,7 +36,7 @@ PHP_FUNCTION(rrd_error)
 
 	if (!rrd_test_error()) RETURN_FALSE;
 
-	RETVAL_STRING(rrd_get_error(), 1);
+	RETVAL_STRING(rrd_get_error());
 	rrd_clear_error();
 }
 /* }}} */
@@ -57,14 +57,14 @@ PHP_FUNCTION(rrd_fetch)
 	char **ds_namv; /* list of data source names */
 	rrd_value_t *ds_data; /* all data from all sources */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa", &filename,
 		&filename_length, &zv_arr_options) == FAILURE) {
 		return;
 	}
 
-	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+	if (php_check_open_basedir(filename)) RETURN_FALSE;
 
-	argv = rrd_args_init_by_phparray("fetch", filename, zv_arr_options TSRMLS_CC);
+	argv = rrd_args_init_by_phparray("fetch", filename, zv_arr_options);
 	if (!argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
 		RETURN_FALSE;
@@ -73,14 +73,13 @@ PHP_FUNCTION(rrd_fetch)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_fetch and test if fails */
-	if (rrd_fetch(argv->count-1, &argv->args[1], &start, &end, &step, &ds_cnt,
+	if (rrd_fetch(argv->count - 1, &argv->args[1], &start, &end, &step, &ds_cnt,
 		&ds_namv, &ds_data) == -1 ) {
-
 		rrd_args_free(argv);
 		RETURN_FALSE;
 	}
 
-	/* making return array*/
+	/* making return array */
 	array_init(return_value);
 	add_assoc_long(return_value, "start", start);
 	add_assoc_long(return_value, "end", end);
@@ -95,49 +94,40 @@ PHP_FUNCTION(rrd_fetch)
 		rrd_value_t *datap = ds_data;
 		uint timestamp, ds_counter;
 		/* final array for all data from all data sources */
-		zval *zv_data_array;
+		zval zv_data_array;
 
-		MAKE_STD_ZVAL(zv_data_array)
-		array_init(zv_data_array);
+		array_init(&zv_data_array);
 
 		/* add arrays for each data source, each array will be filled with
 		 * retrieved data for a particular data source
 		 */
 		for (ds_counter = 0; ds_counter < ds_cnt; ds_counter++) {
-			zval *zv_ds_data_array;
-			MAKE_STD_ZVAL(zv_ds_data_array)
-			array_init(zv_ds_data_array);
+			zval zv_ds_data_array;
+			array_init(&zv_ds_data_array);
 
-			add_assoc_zval(zv_data_array, ds_namv[ds_counter], zv_ds_data_array);
+			add_assoc_zval(&zv_data_array, ds_namv[ds_counter], &zv_ds_data_array);
 		}
 
 		for (timestamp = start + step; timestamp <= end; timestamp += step) {
 			/* try to find current data source result array in the
 			 * zv_data_array
 			 */
-			zend_hash_internal_pointer_reset(Z_ARRVAL_P(zv_data_array));
+			zend_hash_internal_pointer_reset(Z_ARRVAL(zv_data_array));
 			for (ds_counter = 0; ds_counter < ds_cnt; ds_counter++) {
 				/* pointer for one data source retrieved data */
-				zval **ds_data_array;
+				zval *ds_data_array;
 				/* value for key (timestamp) in data array */
-				zval *zv_timestamp;
-
-				MAKE_STD_ZVAL(zv_timestamp);
-				ZVAL_LONG(zv_timestamp, timestamp);
-				convert_to_string(zv_timestamp);
+				char str_timestamp[11];
+				ZEND_LTOA((zend_ulong)timestamp, str_timestamp, sizeof(str_timestamp));
 
 				/* gets pointer for data source result array */
-				zend_hash_get_current_data(Z_ARRVAL_P(zv_data_array), (void**) &ds_data_array);
+				ds_data_array = zend_hash_get_current_data(Z_ARRVAL(zv_data_array));
 
-				add_assoc_double(*ds_data_array, Z_STRVAL_P(zv_timestamp), *(datap++));
-
-				zend_hash_move_forward(Z_ARRVAL_P(zv_data_array));
-
-				zval_dtor(zv_timestamp);
-				efree(zv_timestamp);
+				add_assoc_double(ds_data_array, str_timestamp, *(datap++));
+				zend_hash_move_forward(Z_ARRVAL(zv_data_array));
 			}
 		}
-		add_assoc_zval(return_value, "data", zv_data_array);
+		add_assoc_zval(return_value, "data", &zv_data_array);
 
 		/* free data from rrd_fetch */
 		free(ds_data);
@@ -162,7 +152,7 @@ PHP_FUNCTION(rrd_first)
 	/* return value from rrd_first_r call */
 	time_t rrd_first_return_val;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &filename,
 		&filename_length, &rraindex) == FAILURE) {
 		return;
 	}
@@ -172,7 +162,9 @@ PHP_FUNCTION(rrd_first)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+	if (php_check_open_basedir(filename)) {
+		RETURN_FALSE;
+	}
 
 	if (rrd_test_error()) rrd_clear_error();
 
@@ -195,12 +187,14 @@ PHP_FUNCTION(rrd_last)
 	/* return value from rrd_first_r call */
 	time_t rrd_last_return_val;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename,
 		&filename_length) == FAILURE) {
 		return;
 	}
 
-	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+	if (php_check_open_basedir(filename)) {
+		RETURN_FALSE;
+	}
 
 	if (rrd_test_error()) rrd_clear_error();
 
@@ -229,12 +223,14 @@ PHP_FUNCTION(rrd_lastupdate)
 	char **ds_namv;
 	char **last_ds;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename,
 		&filename_length) == FAILURE) {
 		return;
 	}
 
-	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+	if (php_check_open_basedir(filename)) {
+		RETURN_FALSE;
+	}
 
 	argv[0] = "dummy";
 	argv[1] = estrdup("lastupdate");
@@ -265,16 +261,15 @@ PHP_FUNCTION(rrd_lastupdate)
 		add_assoc_null(return_value, "ds_namv");
 	} else {
 		uint i;
-		zval *zv_ds_namv_array;
-		MAKE_STD_ZVAL(zv_ds_namv_array);
-		array_init(zv_ds_namv_array);
+		zval zv_ds_namv_array;
+		array_init(&zv_ds_namv_array);
 
 		for (i = 0; i < ds_cnt; i++) {
-			add_next_index_string(zv_ds_namv_array, ds_namv[i], 1);
+			add_next_index_string(&zv_ds_namv_array, ds_namv[i]);
 			free(ds_namv[i]);
 		}
 		free(ds_namv);
-		add_assoc_zval(return_value, "ds_navm", zv_ds_namv_array);
+		add_assoc_zval(return_value, "ds_navm", &zv_ds_namv_array);
 	}
 
 	/* "data" return array or null, if no available */
@@ -282,19 +277,18 @@ PHP_FUNCTION(rrd_lastupdate)
 		add_assoc_null(return_value, "data");
 	} else {
 		uint i;
-		zval *zv_data_array;
-		MAKE_STD_ZVAL(zv_data_array);
-		array_init(zv_data_array);
+		zval zv_data_array;
+		array_init(&zv_data_array);
 
 		/* simple array for "data" is enough, data source names and timestamps are
 		 * available under other return value keys
 		 */
 		for (i = 0; i < ds_cnt; i++) {
-			add_next_index_string(zv_data_array, last_ds[i], 1);
+			add_next_index_string(&zv_data_array, last_ds[i]);
 			free(last_ds[i]);
 		}
 		free(last_ds);
-		add_assoc_zval(return_value, "data", zv_data_array);
+		add_assoc_zval(return_value, "data", &zv_data_array);
 	}
 }
 
@@ -309,29 +303,31 @@ PHP_FUNCTION(rrd_restore)
 	 * rrd_args_init_by_phparray allows only one filename as argument, so
 	 * rrd_filename mugst be part of array of arguments
 	 */
-	zval *zv_options;
+	zval zv_options;
 	rrd_args *argv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|a", &xml_filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|a", &xml_filename,
 		&xml_filename_length, &rrd_filename, &rrd_filename_length,
 		&zv_arr_options) == FAILURE) {
 		return;
 	}
 
-	if (php_check_open_basedir(xml_filename TSRMLS_CC)) RETURN_FALSE;
-	if (php_check_open_basedir(rrd_filename TSRMLS_CC)) RETURN_FALSE;
-
-	/* zv_options = merge rrd_filename and zv_arr_options content */
-	MAKE_STD_ZVAL(zv_options);
-	array_init(zv_options);
-	add_next_index_string(zv_options, rrd_filename, 1);
-	if (zv_arr_options && Z_TYPE_P(zv_arr_options) == IS_ARRAY) {
-		php_array_merge(Z_ARRVAL_P(zv_options), Z_ARRVAL_P(zv_arr_options), 0 TSRMLS_CC);
+	if (php_check_open_basedir(xml_filename) ||
+		php_check_open_basedir(rrd_filename)) {
+		RETURN_FALSE;
 	}
 
-	argv = rrd_args_init_by_phparray("restore", xml_filename, zv_options TSRMLS_CC);
+	/* zv_options = merge rrd_filename and zv_arr_options content */
+	array_init(&zv_options);
+	add_next_index_string(&zv_options, rrd_filename);
+	if (zv_arr_options && Z_TYPE_P(zv_arr_options) == IS_ARRAY) {
+		php_array_merge(Z_ARRVAL(zv_options), Z_ARRVAL_P(zv_arr_options));
+	}
+
+	argv = rrd_args_init_by_phparray("restore", xml_filename, &zv_options);
 	if (!argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
+		zval_dtor(&zv_options);
 		RETURN_FALSE;
 	}
 
@@ -343,7 +339,7 @@ PHP_FUNCTION(rrd_restore)
 	} else {
 		RETVAL_TRUE;
 	}
-	zval_dtor(zv_options);
+	zval_dtor(&zv_options);
 	rrd_args_free(argv);
 }
 /* }}} */
@@ -357,7 +353,7 @@ PHP_FUNCTION(rrd_tune)
 	zval *zv_arr_options;
 	rrd_args *argv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sa", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa", &filename,
 		&filename_length, &zv_arr_options) == FAILURE) {
 		return;
 	}
@@ -367,9 +363,9 @@ PHP_FUNCTION(rrd_tune)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+	if (php_check_open_basedir(filename)) RETURN_FALSE;
 
-	argv = rrd_args_init_by_phparray("tune", filename, zv_arr_options TSRMLS_CC);
+	argv = rrd_args_init_by_phparray("tune", filename, zv_arr_options);
 	if (!argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
 		RETURN_FALSE;
@@ -400,14 +396,14 @@ PHP_FUNCTION(rrd_xport)
 	ulong step, outvar_count;
 	char **legend_v;
 	rrd_value_t *data, *data_ptr;
-	zval *zv_data;
+	zval zv_data;
 	ulong outvar_index;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &zv_arr_options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &zv_arr_options) == FAILURE) {
 		return;
 	}
 
-	argv = rrd_args_init_by_phparray("xport", "", zv_arr_options TSRMLS_CC);
+	argv = rrd_args_init_by_phparray("xport", "", zv_arr_options);
 	if (!argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
 		RETURN_FALSE;
@@ -438,8 +434,7 @@ PHP_FUNCTION(rrd_xport)
 		return;
 	}
 
-	MAKE_STD_ZVAL(zv_data);
-	array_init(zv_data);
+	array_init(&zv_data);
 
 	for (outvar_index = 0; outvar_index < outvar_count; outvar_index++) {
 		/* array for a whole one output variable data, it contains indexes
@@ -451,31 +446,26 @@ PHP_FUNCTION(rrd_xport)
 		 *    ...
 		 *  ))
 		 */
-		zval *zv_var_data, *time_data;
-		MAKE_STD_ZVAL(zv_var_data);
-		array_init(zv_var_data);
-		MAKE_STD_ZVAL(time_data);
-		array_init(time_data);
+		zval zv_var_data, time_data;
+		array_init(&zv_var_data);
+		array_init(&time_data);
 
-		add_assoc_string(zv_var_data, "legend", legend_v[outvar_index], 1);
+		add_assoc_string(&zv_var_data, "legend", legend_v[outvar_index]);
 		free(legend_v[outvar_index]);
 
 		data_ptr = data + outvar_index;
-		for (time_index = start+step; time_index <= end; time_index += step) {
+		for (time_index = start + step; time_index <= end; time_index += step) {
 			/* value for key (timestamp) in data array */
-			zval *zv_timestamp;
-			MAKE_STD_ZVAL(zv_timestamp);
-			ZVAL_LONG(zv_timestamp, time_index);
-			convert_to_string(zv_timestamp);
+			char str_timestamp[11];
+			ZEND_LTOA((zend_ulong)time_index, str_timestamp, sizeof(str_timestamp));
 
-			add_assoc_double(time_data, Z_STRVAL_P(zv_timestamp), *data_ptr);
+			add_assoc_double(&time_data, str_timestamp, *data_ptr);
 			data_ptr += outvar_count;
-			zval_dtor(zv_timestamp);
 		}
-		add_assoc_zval(zv_var_data, "data", time_data);
-		add_next_index_zval(zv_data, zv_var_data);
+		add_assoc_zval(&zv_var_data, "data", &time_data);
+		add_next_index_zval(&zv_data, &zv_var_data);
 	}
-	add_assoc_zval(return_value, "data", zv_data);
+	add_assoc_zval(return_value, "data", &zv_data);
 	free(legend_v);
 	free(data);
 }
@@ -504,7 +494,7 @@ PHP_FUNCTION(rrd_version)
 		return;
 	}
 
-	RETVAL_STRING(rrd_strversion(), 1);
+	RETVAL_STRING(rrd_strversion());
 }
 
 /* {{{ arguments */
@@ -590,9 +580,9 @@ static zend_function_entry rrd_functions[] = {
 /* {{{ PHP_MINIT_FUNCTION */
 static PHP_MINIT_FUNCTION(rrd)
 {
-	rrd_graph_minit(TSRMLS_C);
-	rrd_create_minit(TSRMLS_C);
-	rrd_update_minit(TSRMLS_C);
+	rrd_graph_minit();
+	rrd_create_minit();
+	rrd_update_minit();
 	return SUCCESS;
 }
 /* }}} */
@@ -639,7 +629,7 @@ zend_module_entry rrd_module_entry = {
  * filename paremeter is optional.
  */
 rrd_args *rrd_args_init_by_phparray(const char *command_name, const char *filename,
-	const zval *options TSRMLS_DC)
+	const zval *options)
 {
 	uint i, option_count, args_counter = 2;
 	rrd_args *result;
@@ -662,18 +652,18 @@ rrd_args *rrd_args_init_by_phparray(const char *command_name, const char *filena
 	if (strlen(filename)) result->args[args_counter++] = estrdup(filename);
 
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(options));
-	for (i=0; i<option_count; i++) {
-		zval **item;
-		smart_str option = {0}; /* one argument option */
+	for (i=0; i < option_count; i++) {
+		zval *item;
+		smart_string option = {0}; /* one argument option */
 
 		/* force using strings as array items */
-		zend_hash_get_current_data(Z_ARRVAL_P(options), (void**) &item);
-		if (Z_TYPE_PP(item) != IS_STRING) convert_to_string(*item);
-		smart_str_appendl(&option, Z_STRVAL_PP(item), Z_STRLEN_PP(item));
-		smart_str_0(&option);
+		item = zend_hash_get_current_data(Z_ARRVAL_P(options));
+		if (Z_TYPE_P(item) != IS_STRING) convert_to_string(item);
+		smart_string_appendl(&option, Z_STRVAL_P(item), Z_STRLEN_P(item));
+		smart_string_0(&option);
 
 		result->args[args_counter++] = estrdup(option.c);
-		smart_str_free(&option);
+		smart_string_free(&option);
 
 		zend_hash_move_forward(Z_ARRVAL_P(options));
 	}
@@ -689,8 +679,9 @@ void rrd_args_free(rrd_args *args)
 	int i;
 	if (!args || !args->args) return;
 
-	for (i=1; i<args->count; i++)
+	for (i = 1; i < args->count; i++) {
 		efree(args->args[i]);
+	}
 
 	efree(args->args);
 	efree(args);

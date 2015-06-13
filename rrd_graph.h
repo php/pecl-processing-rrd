@@ -11,7 +11,7 @@
 #ifndef RRD_GRAPH_H
 #define RRD_GRAPH_H
 
-extern void rrd_graph_minit(TSRMLS_D);
+extern void rrd_graph_minit();
 extern PHP_FUNCTION(rrd_graph);
 
 #endif  /* RRD_GRAPH_H */

@@ -14,14 +14,14 @@
 extern zend_module_entry rrd_module_entry;
 #define phpext_rrd_ptr &rrd_module_entry
 
-#define PHP_RRD_VERSION "1.1.3"
+#define PHP_RRD_VERSION "2.0.0beta1"
 
 #ifdef ZTS
 #include "TSRM.h"
 #endif
 
 #ifndef zend_parse_parameters_none
-# define zend_parse_parameters_none() zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")
+# define zend_parse_parameters_none() zend_parse_parameters(ZEND_NUM_ARGS(), "")
 #endif 
 
 typedef struct _rrd_args {
@@ -30,7 +30,7 @@ typedef struct _rrd_args {
 } rrd_args;
 
 extern rrd_args *rrd_args_init_by_phparray(const char *command_name, const char *filename,
-	const zval *options TSRMLS_DC);
+	const zval *options);
 extern void rrd_args_free(rrd_args *args);
 
 #endif  /* PHP_RRD_H */

@@ -11,7 +11,7 @@
 #ifndef RRD_CREATE_H
 #define RRD_CREATE_H
 
-void rrd_create_minit(TSRMLS_D);
+void rrd_create_minit();
 PHP_FUNCTION(rrd_create);
 
 #endif  /* RRD_CREATE_H */

@@ -48,8 +48,11 @@ echo "exporting rrd_updater_test.png via exec\n";
 exec($command);
 
 $command = "$rrdtool_bin fetch $rrdFile AVERAGE --start 920804400 --end 920809200";
-$output = array();
 exec($command, $output);
+// maybe bug in exec output catching
+if ($output[1] === "\n") {
+	$output[1] = "";	
+}
 $originalFetch = file($data_updaterTxt, FILE_IGNORE_NEW_LINES);
 echo "comparing original and current fetch\n";
 var_dump(array_diff($output, $originalFetch));

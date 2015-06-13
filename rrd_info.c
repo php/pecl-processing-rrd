@@ -33,12 +33,12 @@ PHP_FUNCTION(rrd_info)
 	/* return value from rrd_info_r() */
 	rrd_info_t *rrd_info_data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename,
 		&filename_length) == FAILURE) {
 		return;
 	}
 
-	if (php_check_open_basedir(filename TSRMLS_CC)) RETURN_FALSE;
+	if (php_check_open_basedir(filename)) RETURN_FALSE;
 
 	argv[0] = "dummy";
 	argv[1] = estrdup("info");
@@ -52,7 +52,7 @@ PHP_FUNCTION(rrd_info)
 
 	/* making return array*/
 	array_init(return_value);
-	rrd_info_toarray(rrd_info_data, return_value TSRMLS_CC);
+	rrd_info_toarray(rrd_info_data, return_value);
 	rrd_info_free(rrd_info_data);
 }
 /* }}} */
@@ -60,7 +60,7 @@ PHP_FUNCTION(rrd_info)
 /* {{{ converts rrd_info_t struct into php array
   @return int 1 OK, 0 conversion failed
  */
-uint rrd_info_toarray(const rrd_info_t *rrd_info_data, zval *array TSRMLS_DC)
+uint rrd_info_toarray(const rrd_info_t *rrd_info_data, zval *array)
 {
 	const rrd_info_t *data_p;
 
@@ -79,11 +79,11 @@ uint rrd_info_toarray(const rrd_info_t *rrd_info_data, zval *array TSRMLS_DC)
 			add_assoc_long(array, data_p->key, data_p->value.u_int);
 			break;
 		case RD_I_STR:
-			add_assoc_string(array, data_p->key, data_p->value.u_str, 1);
+			add_assoc_string(array, data_p->key, data_p->value.u_str);
 			break;
 		case RD_I_BLO:
 			add_assoc_stringl(array, data_p->key, (char *)data_p->value.u_blo.ptr,
-				 data_p->value.u_blo.size, 1);
+				 data_p->value.u_blo.size);
 			break;
 		}
 		data_p = data_p->next;
