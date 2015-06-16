@@ -14,7 +14,7 @@
 extern zend_module_entry rrd_module_entry;
 #define phpext_rrd_ptr &rrd_module_entry
 
-#define PHP_RRD_VERSION "2.0.0beta1"
+#define PHP_RRD_VERSION "2.0.0beta2"
 
 #ifdef ZTS
 #include "TSRM.h"
