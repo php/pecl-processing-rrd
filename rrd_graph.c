@@ -89,7 +89,7 @@ PHP_METHOD(RRDGraph, __construct)
 {
 	rrd_graph_object *intern_obj;
 	char *path;
-	int path_length;
+	size_t path_length;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &path, &path_length) == FAILURE) {
 		return;
@@ -294,7 +294,7 @@ PHP_METHOD(RRDGraph, saveVerbose)
 PHP_FUNCTION(rrd_graph)
 {
 	char *filename;
-	int filename_length;
+	size_t filename_length;
 	zval *zv_arr_options;
 	rrd_args *argv;
 	/* returned values if rrd_graph doesn't fail */

@@ -102,9 +102,9 @@ creates new object for creating rrd database
 PHP_METHOD(RRDCreator, __construct)
 {
 	rrd_create_object *intern_obj;
-	char *path; int path_length;
+	char *path; size_t path_length;
 	/* better to set defaults for optional parameters */
-	char *start_time = NULL; int start_time_length = 0;
+	char *start_time = NULL; size_t start_time_length = 0;
 	long step = 0;
 	int argc = ZEND_NUM_ARGS();
 
@@ -146,7 +146,7 @@ PHP_METHOD(RRDCreator, addDataSource)
 {
 	rrd_create_object *intern_obj;
 	char *desc, *rrd_source_desc;
-	int desc_length;
+	size_t desc_length;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &desc, &desc_length) == FAILURE) {
 		return;
@@ -181,7 +181,7 @@ PHP_METHOD(RRDCreator, addArchive)
 {
 	rrd_create_object *intern_obj;
 	char *desc, *rrd_archive_desc;
-	int desc_length;
+	size_t desc_length;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &desc, &desc_length) == FAILURE) {
 		return;
@@ -284,7 +284,7 @@ PHP_METHOD(RRDCreator, save)
 PHP_FUNCTION(rrd_create)
 {
 	char *filename;
-	int filename_length;
+	size_t filename_length;
 	zval *zv_arr_options;
 	rrd_args *argv;
 

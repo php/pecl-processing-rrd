@@ -25,7 +25,7 @@
 PHP_FUNCTION(rrd_info)
 {
 	char *filename;
-	int filename_length;
+	size_t filename_length;
 	/* list of arguments for rrd_info call, it's more efficient then u
 	 * usage of rrd_args, because there isn't array of arguments in parameters
 	 */

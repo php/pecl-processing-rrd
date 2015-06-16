@@ -83,7 +83,7 @@ PHP_METHOD(RRDUpdater, __construct)
 {
 	rrd_update_object *intern_obj;
 	char *path;
-	int path_length;
+	size_t path_length;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &path, &path_length) == FAILURE) {
 		return;
@@ -107,7 +107,7 @@ PHP_METHOD(RRDUpdater, update)
 	rrd_args *update_argv;
 
 	char *time = NULL;
-	int time_str_length = 0;
+	size_t time_str_length = 0;
 
 	int argc = ZEND_NUM_ARGS();
 	zend_string *zs_ds_name;
@@ -215,7 +215,7 @@ PHP_METHOD(RRDUpdater, update)
 PHP_FUNCTION(rrd_update)
 {
 	char *filename;
-	int filename_length;
+	size_t filename_length;
 	zval *zv_arr_options;
 	rrd_args *argv;
 
