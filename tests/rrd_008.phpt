@@ -1,6 +1,7 @@
 --TEST--
 rrd_graph test
 --SKIPIF--
+<?php
 include('skipif.inc');
 include('rrdtool-bin.inc');
 include('data/definition.inc');

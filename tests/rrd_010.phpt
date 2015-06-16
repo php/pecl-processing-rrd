@@ -1,11 +1,13 @@
 --TEST--
 rrd_fetch test
 --SKIPIF--
+<?php
 include('skipif.inc');
 include('data/definition.inc');
 if (!file_exists($data_moreDSDb)) {
 	die("skip $data_moreDSDb doesnt' exist");
 }
+?>
 --FILE--
 <?php
 include('data/definition.inc');
