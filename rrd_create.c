@@ -108,7 +108,7 @@ PHP_METHOD(RRDCreator, __construct)
 	long step = 0;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "s|sl", &path, &path_length,
+	if (zend_parse_parameters(argc, "p|sl", &path, &path_length,
 		&start_time, &start_time_length, &step) == FAILURE) {
 		return;
 	}
@@ -288,7 +288,7 @@ PHP_FUNCTION(rrd_create)
 	zval *zv_arr_options;
 	rrd_args *argv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pa", &filename,
 		&filename_length, &zv_arr_options) == FAILURE) {
 		return;
 	}

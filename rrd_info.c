@@ -33,7 +33,7 @@ PHP_FUNCTION(rrd_info)
 	/* return value from rrd_info_r() */
 	rrd_info_t *rrd_info_data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename,
 		&filename_length) == FAILURE) {
 		return;
 	}

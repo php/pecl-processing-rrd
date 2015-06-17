@@ -85,7 +85,7 @@ PHP_METHOD(RRDUpdater, __construct)
 	char *path;
 	size_t path_length;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &path, &path_length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &path, &path_length) == FAILURE) {
 		return;
 	}
 
@@ -219,7 +219,7 @@ PHP_FUNCTION(rrd_update)
 	zval *zv_arr_options;
 	rrd_args *argv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pa", &filename,
 		&filename_length, &zv_arr_options) == FAILURE) {
 		return;
 	}

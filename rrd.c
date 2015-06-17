@@ -60,7 +60,7 @@ PHP_FUNCTION(rrd_fetch)
 	char **ds_namv; /* list of data source names */
 	rrd_value_t *ds_data; /* all data from all sources */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pa", &filename,
 		&filename_length, &zv_arr_options) == FAILURE) {
 		return;
 	}
@@ -155,7 +155,7 @@ PHP_FUNCTION(rrd_first)
 	/* return value from rrd_first_r call */
 	time_t rrd_first_return_val;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &filename,
 		&filename_length, &rraindex) == FAILURE) {
 		return;
 	}
@@ -190,7 +190,7 @@ PHP_FUNCTION(rrd_last)
 	/* return value from rrd_first_r call */
 	time_t rrd_last_return_val;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename,
 		&filename_length) == FAILURE) {
 		return;
 	}
@@ -226,7 +226,7 @@ PHP_FUNCTION(rrd_lastupdate)
 	char **ds_namv;
 	char **last_ds;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename,
 		&filename_length) == FAILURE) {
 		return;
 	}
@@ -309,7 +309,7 @@ PHP_FUNCTION(rrd_restore)
 	zval zv_options;
 	rrd_args *argv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|a", &xml_filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp|a", &xml_filename,
 		&xml_filename_length, &rrd_filename, &rrd_filename_length,
 		&zv_arr_options) == FAILURE) {
 		return;
@@ -356,7 +356,7 @@ PHP_FUNCTION(rrd_tune)
 	zval *zv_arr_options;
 	rrd_args *argv;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa", &filename,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pa", &filename,
 		&filename_length, &zv_arr_options) == FAILURE) {
 		return;
 	}
