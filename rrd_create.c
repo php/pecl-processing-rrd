@@ -30,7 +30,6 @@ static zend_object_handlers rrd_create_handlers;
 of having dedicated creating/cloning/destruction functions
 */
 typedef struct _rrd_create_object {
-	zend_object std;
 	/** path to newly created rrd file */
 	char *file_path;
 	/* "--start" parameters in rrd create */
@@ -41,6 +40,7 @@ typedef struct _rrd_create_object {
 	zval zv_arr_data_sources;
 	/* "RRA" parameters in rrd create */
 	zval zv_arr_archives;
+	zend_object std;
 } rrd_create_object;
 
 /**
@@ -79,7 +79,7 @@ creates new rrd create object
 static zend_object *rrd_create_object_new(zend_class_entry *ce)
 {
 	rrd_create_object *intern_obj = ecalloc(1, sizeof(rrd_create_object) + 
-		sizeof(zval) * (ce->default_properties_count - 1));
+		zend_object_properties_size(ce));
 	intern_obj->file_path = NULL;
 	intern_obj->start_time = NULL;
 	ZVAL_UNDEF(&intern_obj->zv_step);
@@ -329,7 +329,7 @@ static zend_function_entry rrd_create_methods[] = {
 	PHP_ME(RRDCreator, save, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(RRDCreator, addDataSource, arginfo_rrdcreator_description, ZEND_ACC_PUBLIC)
 	PHP_ME(RRDCreator, addArchive, arginfo_rrdcreator_description, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* minit hook, called from main module minit */

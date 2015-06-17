@@ -17,6 +17,9 @@
 #include "ext/standard/info.h"
 
 #include <rrd.h>
+#ifdef HAVE_RRDC_DISCONNECT
+#include <rrd_client.h>
+#endif
 
 #include "php_rrd.h"
 #include "rrd_graph.h"
@@ -47,7 +50,7 @@ Fetch data from RRD in requested resolution.
 PHP_FUNCTION(rrd_fetch)
 {
 	char *filename;
-	int filename_length;
+	size_t filename_length;
 	zval *zv_arr_options;
 	rrd_args *argv;
 	/* returned values if rrd_fetch doesn't fail */
@@ -147,7 +150,7 @@ PHP_FUNCTION(rrd_fetch)
 PHP_FUNCTION(rrd_first)
 {
 	char *filename;
-	int filename_length;
+	size_t filename_length;
 	long rraindex = 0;
 	/* return value from rrd_first_r call */
 	time_t rrd_first_return_val;
@@ -183,7 +186,7 @@ PHP_FUNCTION(rrd_first)
 PHP_FUNCTION(rrd_last)
 {
 	char *filename;
-	int filename_length;
+	size_t filename_length;
 	/* return value from rrd_first_r call */
 	time_t rrd_last_return_val;
 
@@ -212,7 +215,7 @@ PHP_FUNCTION(rrd_last)
 PHP_FUNCTION(rrd_lastupdate)
 {
 	char *filename;
-	int filename_length;
+	size_t filename_length;
 	/* list of arguments for rrd_lastupdate call, it's more efficient then
 	 * usage of rrd_args, because there isn't array of arguments in parameters
 	 */
@@ -297,7 +300,7 @@ PHP_FUNCTION(rrd_lastupdate)
 PHP_FUNCTION(rrd_restore)
 {
 	char *xml_filename, *rrd_filename;
-	int xml_filename_length, rrd_filename_length;
+	size_t xml_filename_length, rrd_filename_length;
 	zval *zv_arr_options = NULL;
 	/* this is merge of options and rrd_filename. This is needed because
 	 * rrd_args_init_by_phparray allows only one filename as argument, so
@@ -349,7 +352,7 @@ PHP_FUNCTION(rrd_restore)
 PHP_FUNCTION(rrd_tune)
 {
 	char *filename;
-	int filename_length;
+	size_t filename_length;
 	zval *zv_arr_options;
 	rrd_args *argv;
 
@@ -569,7 +572,7 @@ static zend_function_entry rrd_functions[] = {
 	PHP_FE(rrdc_disconnect, NULL)
 #endif
 	PHP_FE(rrd_version, NULL)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

@@ -31,9 +31,9 @@ static zend_object_handlers rrd_update_handlers;
  * of having dedicated creating/cloning/destruction functions
  */
 typedef struct _rrd_update_object {
-	zend_object std;
 	/** path to newly created rrd file */
 	char *file_path;
+	zend_object std;
 } rrd_update_object;
 
 /**
@@ -63,8 +63,8 @@ creates new rrd update object
 */
 static zend_object *rrd_update_object_new(zend_class_entry *ce)
 {
-	rrd_update_object *intern_obj = ecalloc(1, sizeof(rrd_update_object) + 
-		sizeof(zval) * (ce->default_properties_count - 1));
+	rrd_update_object *intern_obj = ecalloc(1, sizeof(rrd_update_object) +
+		zend_object_properties_size(ce));
 	intern_obj->file_path = NULL;
 
 	zend_object_std_init(&intern_obj->std, ce);
@@ -257,7 +257,7 @@ ZEND_END_ARG_INFO()
 static zend_function_entry rrd_update_methods[] = {
 	PHP_ME(RRDUpdater, __construct, arginfo_rrdupdater_construct, ZEND_ACC_PUBLIC)
 	PHP_ME(RRDUpdater, update, arginfo_rrdupdater_update, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* minit hook, called from main module minit */
@@ -271,5 +271,5 @@ void rrd_update_minit()
 	memcpy(&rrd_update_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	rrd_update_handlers.clone_obj = NULL;
 	rrd_update_handlers.offset = XtOffsetOf(rrd_update_object, std);
-	rrd_update_handlers.free_obj = rrd_update_object_dtor; 
+	rrd_update_handlers.free_obj = rrd_update_object_dtor;
 }

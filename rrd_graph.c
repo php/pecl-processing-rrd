@@ -32,9 +32,9 @@ static zend_object_handlers rrd_graph_handlers;
  * of having dedicated creating/cloning/destruction functions
  */
 typedef struct _rrd_graph_object {
-	zend_object std;
 	char *file_path;
 	zval zv_arr_options;
+	zend_object std;
 } rrd_graph_object;
 
 /**
@@ -69,7 +69,7 @@ creates new rrd graph object
 static zend_object *rrd_graph_object_new(zend_class_entry *ce)
 {
 	rrd_graph_object *intern_obj = ecalloc(1, sizeof(rrd_graph_object) + 
-		sizeof(zval) * (ce->default_properties_count - 1));
+		zend_object_properties_size(ce));
 	intern_obj->file_path = NULL;
 	ZVAL_UNDEF(&intern_obj->zv_arr_options);
 
@@ -370,7 +370,7 @@ static zend_function_entry rrd_graph_methods[] = {
 	PHP_ME(RRDGraph, save, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(RRDGraph, saveVerbose, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(RRDGraph, setOptions, arginfo_rrd_options, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* minit hook, called from main module minit */
