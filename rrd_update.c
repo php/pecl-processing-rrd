@@ -106,8 +106,11 @@ PHP_METHOD(RRDUpdater, update)
 	zval zv_update_argv;
 	rrd_args *update_argv;
 
-	char *time = NULL;
-	size_t time_str_length = 0;
+	/* 'N' means default time string for rrd update, 
+	 * see rrdtool update man page
+	 */
+	char *time = "N";
+	size_t time_str_length = 1;
 
 	int argc = ZEND_NUM_ARGS();
 	zend_string *zs_ds_name;
@@ -133,16 +136,9 @@ PHP_METHOD(RRDUpdater, update)
 		RETURN_FALSE;
 	}
 
-	if (time_str_length == 0) {
-		if (argc > 1) {
-			zend_throw_exception(NULL, "time cannot be empty string", 0);
-			return;
-		}
-
-		/* default time string, see rrdtool update man page, it's need to be
-		 freed
-		*/
-		time = estrdup("N");
+	if (argc > 1 && time_str_length == 0) {
+		zend_throw_exception(NULL, "time cannot be empty string", 0);
+		return;
 	}
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zv_values_array), zs_ds_name, zv_ds_val) {
@@ -190,7 +186,6 @@ PHP_METHOD(RRDUpdater, update)
 	if (rrd_update(update_argv->count - 1, &update_argv->args[1]) == -1) {
 		zval_dtor(&zv_update_argv);
 		rrd_args_free(update_argv);
-		if (time_str_length == 0) efree(time);
 
 		/* throw exception with rrd error string */
 		zend_throw_exception(NULL, rrd_get_error(), 0);
@@ -198,10 +193,6 @@ PHP_METHOD(RRDUpdater, update)
 		return;
 	}
 
-	/* parameter isn't presented and we alloced default one, so we need to
-	 * free this one
-	 */
-	if (time_str_length == 0) efree(time);
 	zval_dtor(&zv_update_argv);
 	rrd_args_free(update_argv);
 
