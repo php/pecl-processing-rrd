@@ -29,7 +29,7 @@
   - PHP_FE_END instead of 3 times NULL in zend_function_entry - uggh - (remi)
   - zend_object_properties_size() usage (remi)
   - size_t for string parameters length (remi)
-  - huge thanks for remi :)
+  - huge thanks to remi :)
   ]]>
  </notes>
  <contents>
