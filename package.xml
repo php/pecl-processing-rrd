@@ -11,25 +11,18 @@
   <active>yes</active>
  </lead>
  <!-- latest release information -->
- <date>2015-06-27</date>
+ <date>2015-12-28</date>
  <version>
-  <release>2.0.0beta3</release>
+  <release>2.0.0</release>
   <api>1.1</api>
  </version>
  <stability>
-  <release>beta</release>
+  <release>stable</release>
   <api>stable</api>
  </stability>
  <license>BSD</license>
  <notes><![CDATA[
-  - better default time parameter handling for RRDUpdater:update
-  - zend_string in zend_parse_parameter if possible
-  - 'p' for paths in zend_parse_parameter (remi)
-  - zend_object must be the last member of the own object struct - uggh - (remi)
-  - PHP_FE_END instead of 3 times NULL in zend_function_entry - uggh - (remi)
-  - zend_object_properties_size() usage (remi)
-  - size_t for string parameters length (remi)
-  - huge thanks to remi :)
+  - utilize ZSTR macros for zend_string
   ]]>
  </notes>
  <contents>
@@ -93,6 +86,21 @@
  <providesextension>rrd</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>2.0.0</release>
+    <api>1.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+  - utilize ZSTR macros for zend_string
+  ]]>
+   </notes>
+   <date>2015-12-28</date>
+  </release>
   <release>
    <version>
     <release>2.0.0beta2</release>
