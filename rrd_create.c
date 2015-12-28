@@ -119,7 +119,7 @@ PHP_METHOD(RRDCreator, __construct)
 		return;
 	}
 
-	if (argc > 1 && start_time->len == 0) {
+	if (argc > 1 && ZSTR_LEN(start_time) == 0) {
 		zend_throw_exception(NULL,
 			"startTime cannot be empty string", 0);
 		return;
@@ -132,7 +132,7 @@ PHP_METHOD(RRDCreator, __construct)
 
 	intern_obj = php_rrd_create_fetch_object(Z_OBJ_P(getThis()));
 	intern_obj->file_path = estrdup(path);
-	if (start_time) intern_obj->start_time = estrdup(start_time->val);
+	if (start_time) intern_obj->start_time = estrdup(ZSTR_VAL(start_time));
 	if (step) {
 		ZVAL_LONG(&intern_obj->zv_step, step);
 	}
@@ -152,7 +152,7 @@ PHP_METHOD(RRDCreator, addDataSource)
 		return;
 	}
 
-	if (description->len == 0) {
+	if (ZSTR_LEN(description) == 0) {
 		zend_throw_exception(NULL,
 			"description parameter cannot be empty string", 0);
 		return;
@@ -165,9 +165,9 @@ PHP_METHOD(RRDCreator, addDataSource)
 		array_init(&intern_obj->zv_arr_data_sources);
 	}
 
-	rrd_source_desc = emalloc(description->len + 4);
+	rrd_source_desc = emalloc(ZSTR_LEN(description) + 4);
 	strcpy(rrd_source_desc, "DS:");
-	strcat(rrd_source_desc, description->val);
+	strcat(rrd_source_desc, ZSTR_VAL(description));
 
 	add_next_index_string(&intern_obj->zv_arr_data_sources, rrd_source_desc);
 	efree(rrd_source_desc);
@@ -187,7 +187,7 @@ PHP_METHOD(RRDCreator, addArchive)
 		return;
 	}
 
-	if (description->len == 0) {
+	if (ZSTR_LEN(description) == 0) {
 		zend_throw_exception(NULL,
 			"description parameter cannot be empty string", 0);
 		return;
@@ -199,9 +199,9 @@ PHP_METHOD(RRDCreator, addArchive)
 		array_init(&intern_obj->zv_arr_archives);
 	}
 
-	rrd_archive_desc = emalloc(description->len + 5);
+	rrd_archive_desc = emalloc(ZSTR_LEN(description) + 5);
 	strcpy(rrd_archive_desc, "RRA:");
-	strcat(rrd_archive_desc, description->val);
+	strcat(rrd_archive_desc, ZSTR_VAL(description));
 
 	add_next_index_string(&intern_obj->zv_arr_archives, rrd_archive_desc);
 	efree(rrd_archive_desc);

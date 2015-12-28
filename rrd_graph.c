@@ -146,7 +146,7 @@ static rrd_args *rrd_graph_obj_create_argv(const char *command_name, const rrd_g
 		 * "key=value" e.g. "--start=920804400"
 		 */
 		if (zs_key) {
-			smart_string_appends(&option, zs_key->val);
+			smart_string_appends(&option, ZSTR_VAL(zs_key));
 			smart_string_appendc(&option, '=');
 		}
 

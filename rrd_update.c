@@ -148,7 +148,7 @@ PHP_METHOD(RRDUpdater, update)
 			smart_string_appends(&ds_names, "--template=");
 		}
 
-		smart_string_appends(&ds_names, zs_ds_name->val);
+		smart_string_appends(&ds_names, ZSTR_VAL(zs_ds_name));
 
 		/* "timestamp:ds1Value:ds2Value" string */
 		if (!ds_vals.len) {
