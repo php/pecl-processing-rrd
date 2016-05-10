@@ -11,9 +11,9 @@
   <active>yes</active>
  </lead>
  <!-- latest release information -->
- <date>2015-12-28</date>
+ <date>2016-05-10</date>
  <version>
-  <release>2.0.0</release>
+  <release>2.0.1</release>
   <api>1.1</api>
  </version>
  <stability>
@@ -22,7 +22,8 @@
  </stability>
  <license>BSD</license>
  <notes><![CDATA[
-  - utilize ZSTR macros for zend_string
+  - config.m4 - cleanup, pkg-config usage
+  - check for rrdtool 1.5, 1.6 - works without code changes
   ]]>
  </notes>
  <contents>
@@ -86,6 +87,22 @@
  <providesextension>rrd</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>2.0.1</release>
+    <api>1.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <notes><![CDATA[
+    - config.m4 - cleanup, pkg-config usage
+    - check for rrdtool 1.5, 1.6 - works without code changes
+   ]]>
+   </notes>
+   <date>2016-05-10</date>
+  </release>
   <release>
    <version>
     <release>2.0.0</release>
