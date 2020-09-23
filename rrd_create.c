@@ -323,10 +323,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_rrdcreator_description, 0, 0, 1)
 	ZEND_ARG_INFO(0, description)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_rrdcreator_void, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 /* class method table */
 static zend_function_entry rrd_create_methods[] = {
 	PHP_ME(RRDCreator, __construct, arginfo_rrdcreator_construct, ZEND_ACC_PUBLIC)
-	PHP_ME(RRDCreator, save, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(RRDCreator, save, arginfo_rrdcreator_void, ZEND_ACC_PUBLIC)
 	PHP_ME(RRDCreator, addDataSource, arginfo_rrdcreator_description, ZEND_ACC_PUBLIC)
 	PHP_ME(RRDCreator, addArchive, arginfo_rrdcreator_description, ZEND_ACC_PUBLIC)
 	PHP_FE_END

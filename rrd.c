@@ -552,6 +552,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_rrd_update, 0)
 	ZEND_ARG_INFO(0, file)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_rrd_void, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ */
@@ -559,7 +562,7 @@ static zend_function_entry rrd_functions[] = {
 	PHP_FE(rrd_update, arginfo_rrd_update)
 	PHP_FE(rrd_create, arginfo_rrd_create)
 	PHP_FE(rrd_graph, arginfo_rrd_graph)
-	PHP_FE(rrd_error, NULL)
+	PHP_FE(rrd_error, arginfo_rrd_void)
 	PHP_FE(rrd_fetch, arginfo_rrd_fetch)
 	PHP_FE(rrd_first, arginfo_rrd_first)
 	PHP_FE(rrd_info, arginfo_rrd_info)
@@ -569,9 +572,9 @@ static zend_function_entry rrd_functions[] = {
 	PHP_FE(rrd_tune, arginfo_rrd_tune)
 	PHP_FE(rrd_xport, arginfo_rrd_xport)
 #ifdef HAVE_RRDC_DISCONNECT
-	PHP_FE(rrdc_disconnect, NULL)
+	PHP_FE(rrdc_disconnect, arginfo_rrd_void)
 #endif
-	PHP_FE(rrd_version, NULL)
+	PHP_FE(rrd_version, arginfo_rrd_void)
 	PHP_FE_END
 };
 /* }}} */

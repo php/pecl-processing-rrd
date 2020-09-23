@@ -140,6 +140,7 @@ static rrd_args *rrd_graph_obj_create_argv(const char *command_name, const rrd_g
 	array_init(&zv_argv);
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(obj->zv_arr_options), num_key, zs_key, zv_option_val) {
+		(void)num_key; /* to avoid -Wunused-but-set-variable */
 		smart_string option = {0}; /* one argument option */
 
 		/* option with string key means long option, hence they are used as
@@ -356,6 +357,9 @@ PHP_FUNCTION(rrd_graph)
 /* }}} */
 
 /* arguments */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_rrd_void, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_rrd_path, 0, 0, 1)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
@@ -367,8 +371,8 @@ ZEND_END_ARG_INFO()
 /* class method table */
 static zend_function_entry rrd_graph_methods[] = {
 	PHP_ME(RRDGraph, __construct, arginfo_rrd_path, ZEND_ACC_PUBLIC)
-	PHP_ME(RRDGraph, save, NULL, ZEND_ACC_PUBLIC)
-	PHP_ME(RRDGraph, saveVerbose, NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(RRDGraph, save, arginfo_rrd_void, ZEND_ACC_PUBLIC)
+	PHP_ME(RRDGraph, saveVerbose, arginfo_rrd_void, ZEND_ACC_PUBLIC)
 	PHP_ME(RRDGraph, setOptions, arginfo_rrd_options, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };

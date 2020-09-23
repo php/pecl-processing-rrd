@@ -69,7 +69,7 @@ array(27) {
   ["rra[1].xff"]=>
   float(0.5)
   ["rra[1].cdp_prep[0].value"]=>
-  float(0.026666666666667)
+  float(0.02666666666%s)
   ["rra[1].cdp_prep[0].unknown_datapoints"]=>
   int(0)
 }
