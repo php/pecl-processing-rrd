@@ -60,7 +60,7 @@ PHP_FUNCTION(rrd_info)
 /* {{{ converts rrd_info_t struct into php array
   @return int 1 OK, 0 conversion failed
  */
-uint rrd_info_toarray(const rrd_info_t *rrd_info_data, zval *array)
+unsigned rrd_info_toarray(const rrd_info_t *rrd_info_data, zval *array)
 {
 	const rrd_info_t *data_p;
 

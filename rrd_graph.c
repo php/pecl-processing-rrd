@@ -230,7 +230,7 @@ PHP_METHOD(RRDGraph, save)
 		zval zv_calcpr_array;
 		array_init(&zv_calcpr_array);
 		if (calcpr) {
-			uint i;
+			unsigned i;
 			for (i = 0; calcpr[i]; i++) {
 				add_next_index_string(&zv_calcpr_array, calcpr[i]);
 				free(calcpr[i]);
@@ -342,7 +342,7 @@ PHP_FUNCTION(rrd_graph)
 		zval zv_calcpr_array;
 		array_init(&zv_calcpr_array);
 		if (calcpr) {
-			uint i;
+			unsigned i;
 			for (i = 0; calcpr[i]; i++) {
 				add_next_index_string(&zv_calcpr_array, calcpr[i]);
 				free(calcpr[i]);
