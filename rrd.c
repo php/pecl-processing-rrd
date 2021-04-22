@@ -55,7 +55,7 @@ PHP_FUNCTION(rrd_fetch)
 	rrd_args *argv;
 	/* returned values if rrd_fetch doesn't fail */
 	time_t start, end;
-	ulong step,
+	zend_ulong step,
 	ds_cnt; /* count of data sources */
 	char **ds_namv; /* list of data source names */
 	rrd_value_t *ds_data; /* all data from all sources */
@@ -95,7 +95,7 @@ PHP_FUNCTION(rrd_fetch)
 		add_assoc_null(return_value, "data");
 	} else {
 		rrd_value_t *datap = ds_data;
-		uint timestamp, ds_counter;
+		unsigned timestamp, ds_counter;
 		/* final array for all data from all data sources */
 		zval zv_data_array;
 
@@ -263,7 +263,7 @@ PHP_FUNCTION(rrd_lastupdate)
 	if (!ds_namv || !ds_cnt) {
 		add_assoc_null(return_value, "ds_namv");
 	} else {
-		uint i;
+		unsigned i;
 		zval zv_ds_namv_array;
 		array_init(&zv_ds_namv_array);
 
@@ -279,7 +279,7 @@ PHP_FUNCTION(rrd_lastupdate)
 	if (!last_ds || !ds_cnt) {
 		add_assoc_null(return_value, "data");
 	} else {
-		uint i;
+		unsigned i;
 		zval zv_data_array;
 		array_init(&zv_data_array);
 
@@ -396,11 +396,11 @@ PHP_FUNCTION(rrd_xport)
 	/* return values from rrd_xport */
 	int xxsize;
 	time_t start, end, time_index;
-	ulong step, outvar_count;
+	zend_ulong step, outvar_count;
 	char **legend_v;
 	rrd_value_t *data, *data_ptr;
 	zval zv_data;
-	ulong outvar_index;
+	zend_ulong outvar_index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &zv_arr_options) == FAILURE) {
 		return;
@@ -637,7 +637,7 @@ zend_module_entry rrd_module_entry = {
 rrd_args *rrd_args_init_by_phparray(const char *command_name, const char *filename,
 	const zval *options)
 {
-	uint i, option_count, args_counter = 2;
+	unsigned i, option_count, args_counter = 2;
 	rrd_args *result;
 
 	if (Z_TYPE_P(options) != IS_ARRAY) return NULL;

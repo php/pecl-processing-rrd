@@ -15,6 +15,6 @@ extern PHP_FUNCTION(rrd_info);
 
 /* necessary, because rrd_info_t definition is needed for function definition */
 #include <rrd.h>
-extern uint rrd_info_toarray(const rrd_info_t *rrd_info_data, zval *array);
+extern unsigned rrd_info_toarray(const rrd_info_t *rrd_info_data, zval *array);
 
 #endif  /* RRD_INFO_H */
