@@ -55,7 +55,7 @@ PHP_FUNCTION(rrd_fetch)
 	rrd_args *argv;
 	/* returned values if rrd_fetch doesn't fail */
 	time_t start, end;
-	zend_ulong step,
+	unsigned long step,
 	ds_cnt; /* count of data sources */
 	char **ds_namv; /* list of data source names */
 	rrd_value_t *ds_data; /* all data from all sources */
@@ -396,7 +396,7 @@ PHP_FUNCTION(rrd_xport)
 	/* return values from rrd_xport */
 	int xxsize;
 	time_t start, end, time_index;
-	zend_ulong step, outvar_count;
+	unsigned long step, outvar_count;
 	char **legend_v;
 	rrd_value_t *data, *data_ptr;
 	zval zv_data;
