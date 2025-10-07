@@ -14,7 +14,11 @@
 
 #include "php.h"
 #include "zend_exceptions.h"
-#include "ext/standard/php_smart_string.h"
+#if PHP_VERSION_ID < 70200
+#include <ext/standard/php_smart_string.h>
+#else
+#include <Zend/zend_smart_string.h>
+#endif
 
 #include <rrd.h>
 
