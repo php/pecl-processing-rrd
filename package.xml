@@ -11,9 +11,9 @@
   <active>yes</active>
  </lead>
  <!-- latest release information -->
- <date>2021-04-22</date>
+ <date>2026-08-19</date>
  <version>
-  <release>2.0.3</release>
+  <release>2.0.4</release>
   <api>1.1</api>
  </version>
  <stability>
@@ -22,7 +22,8 @@
  </stability>
  <license>BSD</license>
  <notes><![CDATA[
-  - fix windows build - thanks Christoph <cmb@php.net>
+  - fix build on PHP 8.4 and 8.5: php_smart_string.h moved to Zend/zend_smart_string.h - thanks Remi
+  - fix incompatible pointer types on 32-bit builds - thanks Remi
   ]]>
  </notes>
  <contents>
@@ -86,6 +87,23 @@
  <providesextension>rrd</providesextension>
  <extsrcrelease />
  <changelog>
+  <release>
+   <version>
+    <release>2.0.4</release>
+    <api>1.1</api>
+   </version>
+   <stability>
+    <release>stable</release>
+    <api>stable</api>
+   </stability>
+   <license>BSD</license>
+   <notes><![CDATA[
+    - fix build on PHP 8.4 and 8.5: php_smart_string.h moved to Zend/zend_smart_string.h - thanks Remi
+    - fix incompatible pointer types on 32-bit builds - thanks Remi
+   ]]>
+   </notes>
+   <date>2026-08-19</date>
+  </release>
   <release>
    <version>
     <release>2.0.3</release>

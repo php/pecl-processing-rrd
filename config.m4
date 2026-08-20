@@ -17,7 +17,7 @@ fi
 
 if test "$PHP_RRD" != "no"; then
   AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-  AC_MSG_CHECKING(for librdd)
+  AC_MSG_CHECKING(for librrd)
   if test -x "$PKG_CONFIG" && $PKG_CONFIG --exists librrd && $PKG_CONFIG librrd --atleast-version 1.3.0; then
     AC_MSG_RESULT(found)
     LIBRRD_CFLAGS=`$PKG_CONFIG librrd --cflags`
