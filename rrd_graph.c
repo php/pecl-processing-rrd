@@ -158,12 +158,11 @@ static rrd_args *rrd_graph_obj_create_argv(const char *command_name, const rrd_g
 		}
 
 		/* use always string for option value */
-		if (Z_TYPE_P(zv_option_val) != IS_STRING) {
-			convert_to_string(zv_option_val);
-		}
+		zend_string *option_str = zval_get_string(zv_option_val);
 
-		smart_string_appendl(&option, Z_STRVAL_P(zv_option_val), Z_STRLEN_P(zv_option_val));
+		smart_string_appendl(&option, ZSTR_VAL(option_str), ZSTR_LEN(option_str));
 		smart_string_0(&option);
+		zend_string_release(option_str);
 
 		add_next_index_string(&zv_argv, option.c);
 
@@ -276,6 +275,10 @@ PHP_METHOD(RRDGraph, saveVerbose)
 	if (Z_TYPE(intern_obj->zv_arr_options) != IS_ARRAY) {
 		zend_throw_exception(NULL, "options aren't correctly set", 0);
 		return;
+	}
+
+	if (php_check_open_basedir(intern_obj->file_path)) {
+		RETURN_FALSE;
 	}
 
 	graph_argv = rrd_graph_obj_create_argv("graphv", intern_obj);
