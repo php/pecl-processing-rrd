@@ -174,7 +174,12 @@ PHP_METHOD(RRDUpdater, update)
 			smart_string_appends(&ds_vals, time);
 		}
 		smart_string_appendc(&ds_vals, ':');
-		zs_ds_val = zval_get_string(zv_ds_val);
+		zs_ds_val = zval_try_get_string(zv_ds_val);
+		if (!zs_ds_val) {
+			smart_string_free(&ds_names);
+			smart_string_free(&ds_vals);
+			return;
+		}
 		smart_string_appendl(&ds_vals, ZSTR_VAL(zs_ds_val), ZSTR_LEN(zs_ds_val));
 		zend_string_release(zs_ds_val);
 	} ZEND_HASH_FOREACH_END();
