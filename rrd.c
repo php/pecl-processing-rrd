@@ -81,7 +81,7 @@ PHP_FUNCTION(rrd_fetch)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_fetch and test if fails */
-	if (rrd_fetch(argv->count - 1, &argv->args[1], &start, &end, &step, &ds_cnt,
+	if (rrd_fetch(argv->count - 1, RRD_ARGV(&argv->args[1]), &start, &end, &step, &ds_cnt,
 		&ds_namv, &ds_data) == -1 ) {
 		rrd_args_free(argv);
 		RETURN_FALSE;
@@ -256,7 +256,7 @@ PHP_FUNCTION(rrd_lastupdate)
 	if (rrd_lastupdate_r(argv[2], &last_update, &ds_cnt, &ds_namv,
 		&last_ds) == -1) {
 #else
- 	if (rrd_lastupdate(2, &argv[1], &last_update, &ds_cnt, &ds_namv,
+ 	if (rrd_lastupdate(2, RRD_ARGV(&argv[1]), &last_update, &ds_cnt, &ds_namv,
  		&last_ds) == -1) {
 #endif
 		efree(argv[2]); efree(argv[1]);
@@ -348,7 +348,7 @@ PHP_FUNCTION(rrd_restore)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_ restore and test if fails */
-	if (rrd_restore(argv->count-1, &argv->args[1]) == -1) {
+	if (rrd_restore(argv->count-1, RRD_ARGV(&argv->args[1])) == -1) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;
@@ -388,7 +388,7 @@ PHP_FUNCTION(rrd_tune)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_tune and test if fails */
-	if (rrd_tune(argv->count-1, &argv->args[1]) == -1 ) {
+	if (rrd_tune(argv->count-1, RRD_ARGV(&argv->args[1])) == -1 ) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;
@@ -426,7 +426,7 @@ PHP_FUNCTION(rrd_xport)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_xport and test if fails */
-	if (rrd_xport(argv->count-1, &argv->args[1], &xxsize, &start, &end, &step,
+	if (rrd_xport(argv->count-1, RRD_ARGV(&argv->args[1]), &xxsize, &start, &end, &step,
 		&outvar_count, &legend_v, &data) == -1) {
 		php_printf("rrd_xport failed");
 		rrd_args_free(argv);

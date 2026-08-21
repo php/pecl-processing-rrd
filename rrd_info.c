@@ -44,7 +44,7 @@ PHP_FUNCTION(rrd_info)
 	argv[1] = estrdup("info");
 	argv[2] = estrndup(filename, filename_length);
 
-	rrd_info_data = rrd_info(2, &argv[1]);
+	rrd_info_data = rrd_info(2, RRD_ARGV(&argv[1]));
 
 	efree(argv[2]); efree(argv[1]);
 

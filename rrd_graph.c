@@ -232,7 +232,7 @@ PHP_METHOD(RRDGraph, save)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd graph and test if fails */
-	if (rrd_graph(graph_argv->count - 1, &graph_argv->args[1], &calcpr, &xsize,
+	if (rrd_graph(graph_argv->count - 1, RRD_ARGV(&graph_argv->args[1]), &calcpr, &xsize,
 		&ysize, NULL, &ymin, &ymax) == -1) {
 
 		/* throw exception with rrd error string */
@@ -311,7 +311,7 @@ PHP_METHOD(RRDGraph, saveVerbose)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd graphv and test if fails */
-	rrd_info_data = rrd_graph_v(graph_argv->count - 1, &graph_argv->args[1]);
+	rrd_info_data = rrd_graph_v(graph_argv->count - 1, RRD_ARGV(&graph_argv->args[1]));
 	if (!rrd_info_data) {
 		/* throw exception with rrd error string */
 		zend_throw_exception(NULL, rrd_get_error(), 0);
@@ -359,7 +359,7 @@ PHP_FUNCTION(rrd_graph)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd graph and test if fails */
-	if (rrd_graph(argv->count - 1, &argv->args[1], &calcpr, &xsize, &ysize,
+	if (rrd_graph(argv->count - 1, RRD_ARGV(&argv->args[1]), &calcpr, &xsize, &ysize,
 		NULL, &ymin, &ymax) == -1) {
 
 		rrd_args_free(argv);

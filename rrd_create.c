@@ -294,7 +294,7 @@ PHP_METHOD(RRDCreator, save)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_create and test if fails */
-	if (rrd_create(create_argv->count - 1, &create_argv->args[1]) == -1) {
+	if (rrd_create(create_argv->count - 1, RRD_ARGV(&create_argv->args[1])) == -1) {
 		zval_ptr_dtor_nogc(&zv_create_argv);
 		rrd_args_free(create_argv);
 
@@ -335,7 +335,7 @@ PHP_FUNCTION(rrd_create)
 
 	if (rrd_test_error()) rrd_clear_error();
 
-	if (rrd_create(argv->count - 1, &argv->args[1]) == -1 ) {
+	if (rrd_create(argv->count - 1, RRD_ARGV(&argv->args[1])) == -1 ) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;
