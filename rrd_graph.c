@@ -100,7 +100,9 @@ PHP_METHOD(RRDGraph, __construct)
 	}
 
 	intern_obj = php_rrd_graph_fetch_object(Z_OBJ_P(getThis()));
-	intern_obj->file_path = estrdup(path);
+	if (intern_obj->file_path) efree(intern_obj->file_path);
+	intern_obj->file_path = NULL;
+	intern_obj->file_path = estrndup(path, path_length);
 }
 /* }}} */
 
@@ -131,7 +133,8 @@ PHP_METHOD(RRDGraph, setOptions)
 /* {{{
  creates arguments for rrd_graph call for RRDGraph instance options
 */
-static rrd_args *rrd_graph_obj_create_argv(const char *command_name, const rrd_graph_object *obj)
+static rrd_args *rrd_graph_obj_create_argv(const char *command_name,
+	const rrd_graph_object *obj, const char *file_path)
 {
 	/* iterated item and keys*/
 	zval *zv_option_val;
@@ -140,12 +143,18 @@ static rrd_args *rrd_graph_obj_create_argv(const char *command_name, const rrd_g
 	/* arguments for rrd_graph call as php array - temporary storage */
 	zval zv_argv;
 	rrd_args *result;
+	/* converting a value runs __toString, and setOptions() from there would
+	 * free the array this loop is walking
+	 */
+	HashTable *ht = Z_ARRVAL(obj->zv_arr_options);
 
+	GC_ADDREF(ht);
 	array_init(&zv_argv);
 
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(obj->zv_arr_options), num_key, zs_key, zv_option_val) {
+	ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, zs_key, zv_option_val) {
 		(void)num_key; /* to avoid -Wunused-but-set-variable */
 		smart_string option = {0}; /* one argument option */
+		zend_string *option_str;
 
 		/* option with string key means long option, hence they are used as
 		 * "key=value" e.g. "--start=920804400"
@@ -156,19 +165,26 @@ static rrd_args *rrd_graph_obj_create_argv(const char *command_name, const rrd_g
 		}
 
 		/* use always string for option value */
-		if (Z_TYPE_P(zv_option_val) != IS_STRING) {
-			convert_to_string(zv_option_val);
+		option_str = zval_try_get_string(zv_option_val);
+		if (!option_str) {
+			smart_string_free(&option);
+			zval_dtor(&zv_argv);
+			zend_array_release(ht);
+			return NULL;
 		}
 
-		smart_string_appendl(&option, Z_STRVAL_P(zv_option_val), Z_STRLEN_P(zv_option_val));
+		smart_string_appendl(&option, ZSTR_VAL(option_str), ZSTR_LEN(option_str));
 		smart_string_0(&option);
+		zend_string_release(option_str);
 
 		add_next_index_string(&zv_argv, option.c);
 
 		smart_string_free(&option);
 	} ZEND_HASH_FOREACH_END();
 
-	result = rrd_args_init_by_phparray(command_name, obj->file_path, &zv_argv);
+	zend_array_release(ht);
+
+	result = rrd_args_init_by_phparray(command_name, file_path, &zv_argv);
 	zval_dtor(&zv_argv);
 
 	return result;
@@ -189,6 +205,12 @@ PHP_METHOD(RRDGraph, save)
 
 	/* arguments for rrd_graph call */
 	rrd_args *graph_argv;
+	char *checked_path;
+
+	if (!intern_obj->file_path) {
+		zend_throw_exception(NULL, "the object was not constructed", 0);
+		return;
+	}
 
 	if (Z_TYPE(intern_obj->zv_arr_options) != IS_ARRAY) {
 		zend_throw_exception(NULL, "options aren't correctly set", 0);
@@ -199,7 +221,9 @@ PHP_METHOD(RRDGraph, save)
 		RETURN_FALSE;
 	}
 
-	graph_argv = rrd_graph_obj_create_argv("graph", intern_obj);
+	checked_path = estrdup(intern_obj->file_path);
+	graph_argv = rrd_graph_obj_create_argv("graph", intern_obj, checked_path);
+	efree(checked_path);
 	if (!graph_argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
 		RETURN_FALSE;
@@ -260,13 +284,25 @@ PHP_METHOD(RRDGraph, saveVerbose)
 
 	/* arguments for rrd_graph call */
 	rrd_args *graph_argv;
+	char *checked_path;
 
-	if (Z_TYPE(intern_obj->zv_arr_options) != IS_ARRAY) {
-		zend_throw_exception(NULL, "options aren't correctly set", 0); 
+	if (!intern_obj->file_path) {
+		zend_throw_exception(NULL, "the object was not constructed", 0);
 		return;
 	}
 
-	graph_argv = rrd_graph_obj_create_argv("graphv", intern_obj);
+	if (Z_TYPE(intern_obj->zv_arr_options) != IS_ARRAY) {
+		zend_throw_exception(NULL, "options aren't correctly set", 0);
+		return;
+	}
+
+	if (php_check_open_basedir(intern_obj->file_path)) {
+		RETURN_FALSE;
+	}
+
+	checked_path = estrdup(intern_obj->file_path);
+	graph_argv = rrd_graph_obj_create_argv("graphv", intern_obj, checked_path);
+	efree(checked_path);
 	if (!graph_argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
 		RETURN_FALSE;
