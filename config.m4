@@ -5,14 +5,13 @@ PHP_ARG_WITH(rrd, for rrdtool support,
 [  --with-rrd              Include rrdtool support (requires rrdtool >= 1.3.0)], yes)
 
 AC_ARG_WITH(rrd-binary,
-[AC_HELP_STRING([--with-rrd-binary][=PATH], [rrd binary dir path, mostly for testing (default=$PATH)])],
+[AS_HELP_STRING([--with-rrd-binary@<:@=PATH@:>@], [rrd binary dir path, mostly for testing (default=$PATH)])],
 [AC_PATH_PROG(RRDTOOL_BIN, rrdtool, no, $withval)],
 [AC_PATH_PROG(RRDTOOL_BIN, rrdtool, no, $PATH)])
 
 AC_SUBST(RRDTOOL_BIN)
 if test -f $srcdir/tests/rrdtool-bin.inc.in; then
-  AC_OUTPUT(tests/rrdtool-bin.inc)
-  AC_OUTPUT(tests/data/Makefile)
+  AC_CONFIG_FILES([tests/rrdtool-bin.inc tests/data/Makefile])
 fi
 
 if test "$PHP_RRD" != "no"; then
