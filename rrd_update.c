@@ -94,7 +94,8 @@ PHP_METHOD(RRDUpdater, __construct)
 	}
 
 	intern_obj = php_rrd_update_fetch_object(Z_OBJ_P(getThis()));
-	intern_obj->file_path = estrdup(path);
+	if (intern_obj->file_path) efree(intern_obj->file_path);
+	intern_obj->file_path = estrndup(path, path_length);
 }
 /* }}} */
 
@@ -136,6 +137,11 @@ PHP_METHOD(RRDUpdater, update)
 
 	intern_obj = php_rrd_update_fetch_object(Z_OBJ_P(getThis()));
 
+	if (!intern_obj->file_path) {
+		zend_throw_exception(NULL, "the object was not constructed", 0);
+		return;
+	}
+
 	if (php_check_open_basedir(intern_obj->file_path)) {
 		RETURN_FALSE;
 	}
@@ -146,6 +152,14 @@ PHP_METHOD(RRDUpdater, update)
 	}
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zv_values_array), zs_ds_name, zv_ds_val) {
+		if (!zs_ds_name) {
+			smart_string_free(&ds_names);
+			smart_string_free(&ds_vals);
+			zend_throw_exception(NULL,
+				"values array must be keyed by data source name", 0);
+			return;
+		}
+
 		if (ds_names.len) {
 			smart_string_appendc(&ds_names, ':');
 		} else {
@@ -180,7 +194,6 @@ PHP_METHOD(RRDUpdater, update)
 	if (!update_argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
 		zval_dtor(&zv_update_argv);
-		if (time_str_length == 0) efree(time);
 		RETURN_FALSE;
 	}
 

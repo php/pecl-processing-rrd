@@ -100,7 +100,8 @@ PHP_METHOD(RRDGraph, __construct)
 	}
 
 	intern_obj = php_rrd_graph_fetch_object(Z_OBJ_P(getThis()));
-	intern_obj->file_path = estrdup(path);
+	if (intern_obj->file_path) efree(intern_obj->file_path);
+	intern_obj->file_path = estrndup(path, path_length);
 }
 /* }}} */
 
@@ -190,6 +191,11 @@ PHP_METHOD(RRDGraph, save)
 	/* arguments for rrd_graph call */
 	rrd_args *graph_argv;
 
+	if (!intern_obj->file_path) {
+		zend_throw_exception(NULL, "the object was not constructed", 0);
+		return;
+	}
+
 	if (Z_TYPE(intern_obj->zv_arr_options) != IS_ARRAY) {
 		zend_throw_exception(NULL, "options aren't correctly set", 0);
 		return;
@@ -261,8 +267,13 @@ PHP_METHOD(RRDGraph, saveVerbose)
 	/* arguments for rrd_graph call */
 	rrd_args *graph_argv;
 
+	if (!intern_obj->file_path) {
+		zend_throw_exception(NULL, "the object was not constructed", 0);
+		return;
+	}
+
 	if (Z_TYPE(intern_obj->zv_arr_options) != IS_ARRAY) {
-		zend_throw_exception(NULL, "options aren't correctly set", 0); 
+		zend_throw_exception(NULL, "options aren't correctly set", 0);
 		return;
 	}
 
