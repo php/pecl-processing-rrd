@@ -225,14 +225,13 @@ PHP_METHOD(RRDGraph, save)
 	graph_argv = rrd_graph_obj_create_argv("graph", intern_obj, checked_path);
 	efree(checked_path);
 	if (!graph_argv) {
-		zend_error(E_WARNING, "cannot allocate arguments options");
 		RETURN_FALSE;
 	}
 
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd graph and test if fails */
-	if (rrd_graph(graph_argv->count - 1, RRD_ARGV(&graph_argv->args[1]), &calcpr, &xsize,
+	if (rrd_graph(graph_argv->count, RRD_ARGV(graph_argv->args), &calcpr, &xsize,
 		&ysize, NULL, &ymin, &ymax) == -1) {
 
 		/* throw exception with rrd error string */
@@ -304,14 +303,13 @@ PHP_METHOD(RRDGraph, saveVerbose)
 	graph_argv = rrd_graph_obj_create_argv("graphv", intern_obj, checked_path);
 	efree(checked_path);
 	if (!graph_argv) {
-		zend_error(E_WARNING, "cannot allocate arguments options");
 		RETURN_FALSE;
 	}
 
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd graphv and test if fails */
-	rrd_info_data = rrd_graph_v(graph_argv->count - 1, RRD_ARGV(&graph_argv->args[1]));
+	rrd_info_data = rrd_graph_v(graph_argv->count, RRD_ARGV(graph_argv->args));
 	if (!rrd_info_data) {
 		/* throw exception with rrd error string */
 		zend_throw_exception(NULL, rrd_get_error(), 0);
@@ -352,14 +350,13 @@ PHP_FUNCTION(rrd_graph)
 
 	argv = rrd_args_init_by_phparray("graph", filename, zv_arr_options);
 	if (!argv) {
-		zend_error(E_WARNING, "cannot allocate arguments options");
 		RETURN_FALSE;
 	}
 
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd graph and test if fails */
-	if (rrd_graph(argv->count - 1, RRD_ARGV(&argv->args[1]), &calcpr, &xsize, &ysize,
+	if (rrd_graph(argv->count, RRD_ARGV(argv->args), &calcpr, &xsize, &ysize,
 		NULL, &ymin, &ymax) == -1) {
 
 		rrd_args_free(argv);

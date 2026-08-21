@@ -216,7 +216,6 @@ PHP_METHOD(RRDUpdater, update)
 	update_argv = rrd_args_init_by_phparray("update", checked_path, &zv_update_argv);
 	efree(checked_path);
 	if (!update_argv) {
-		zend_error(E_WARNING, "cannot allocate arguments options");
 		zval_ptr_dtor_nogc(&zv_update_argv);
 		RETURN_FALSE;
 	}
@@ -224,7 +223,7 @@ PHP_METHOD(RRDUpdater, update)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_update and test if fails */
-	if (rrd_update(update_argv->count - 1, RRD_ARGV(&update_argv->args[1])) == -1) {
+	if (rrd_update(update_argv->count, RRD_ARGV(update_argv->args)) == -1) {
 		zval_ptr_dtor_nogc(&zv_update_argv);
 		rrd_args_free(update_argv);
 
@@ -260,13 +259,12 @@ PHP_FUNCTION(rrd_update)
 
 	argv = rrd_args_init_by_phparray("update", filename, zv_arr_options);
 	if (!argv) {
-		zend_error(E_WARNING, "cannot allocate arguments options");
 		RETURN_FALSE;
 	}
 
 	if (rrd_test_error()) rrd_clear_error();
 
-	if (rrd_update(argv->count - 1, RRD_ARGV(&argv->args[1])) == -1 ) {
+	if (rrd_update(argv->count, RRD_ARGV(argv->args)) == -1 ) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;

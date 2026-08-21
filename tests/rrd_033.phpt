@@ -29,7 +29,6 @@ $graph->setOptions($options);
 try { $graph->save(); } catch (Throwable $e) { echo get_class($e), "\n"; }
 echo "survived\n";
 ?>
---EXPECTF--
-Warning: cannot allocate arguments options in %s on line %d
+--EXPECT--
 RuntimeException
 survived

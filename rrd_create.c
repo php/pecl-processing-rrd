@@ -286,7 +286,6 @@ PHP_METHOD(RRDCreator, save)
 
 	create_argv = rrd_args_init_by_phparray("create", intern_obj->file_path, &zv_create_argv);
 	if (!create_argv) {
-		zend_error(E_WARNING, "cannot allocate arguments options");
 		zval_ptr_dtor_nogc(&zv_create_argv);
 		RETURN_FALSE;
 	}
@@ -294,7 +293,7 @@ PHP_METHOD(RRDCreator, save)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_create and test if fails */
-	if (rrd_create(create_argv->count - 1, RRD_ARGV(&create_argv->args[1])) == -1) {
+	if (rrd_create(create_argv->count, RRD_ARGV(create_argv->args)) == -1) {
 		zval_ptr_dtor_nogc(&zv_create_argv);
 		rrd_args_free(create_argv);
 
@@ -329,13 +328,12 @@ PHP_FUNCTION(rrd_create)
 
 	argv = rrd_args_init_by_phparray("create", filename, zv_arr_options);
 	if (!argv) {
-		zend_error(E_WARNING, "cannot allocate arguments options");
 		RETURN_FALSE;
 	}
 
 	if (rrd_test_error()) rrd_clear_error();
 
-	if (rrd_create(argv->count - 1, RRD_ARGV(&argv->args[1])) == -1 ) {
+	if (rrd_create(argv->count, RRD_ARGV(argv->args)) == -1 ) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;

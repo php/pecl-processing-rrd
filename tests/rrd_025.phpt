@@ -8,5 +8,5 @@ $creator = new RRDCreator(dirname(__FILE__) . "/empty-create.rrd");
 var_dump($creator->save());
 ?>
 --EXPECTF--
-Warning: cannot allocate arguments options in %s on line %d
+Warning: RRDCreator::save(): options array must not be empty in %s on line %d
 bool(false)
