@@ -676,13 +676,15 @@ rrd_args *rrd_args_init_by_phparray(const char *command_name, const char *filena
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(options));
 	for (i=0; i < option_count; i++) {
 		zval *item;
+		zend_string *item_str;
 		smart_string option = {0}; /* one argument option */
 
 		/* force using strings as array items */
 		item = zend_hash_get_current_data(Z_ARRVAL_P(options));
-		if (Z_TYPE_P(item) != IS_STRING) convert_to_string(item);
-		smart_string_appendl(&option, Z_STRVAL_P(item), Z_STRLEN_P(item));
+		item_str = zval_get_string(item);
+		smart_string_appendl(&option, ZSTR_VAL(item_str), ZSTR_LEN(item_str));
 		smart_string_0(&option);
+		zend_string_release(item_str);
 
 		result->args[args_counter++] = estrdup(option.c);
 		smart_string_free(&option);
