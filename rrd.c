@@ -58,12 +58,12 @@ PHP_FUNCTION(rrd_fetch)
 	zval *zv_arr_options;
 	rrd_args *argv;
 	/* returned values if rrd_fetch doesn't fail */
-	time_t start, end;
-	unsigned long step,
-	ds_cnt; /* count of data sources */
+	time_t start = 0, end = 0;
+	unsigned long step = 0,
+	ds_cnt = 0; /* count of data sources */
 	unsigned ds_counter;
-	char **ds_namv; /* list of data source names */
-	rrd_value_t *ds_data; /* all data from all sources */
+	char **ds_namv = NULL; /* list of data source names */
+	rrd_value_t *ds_data = NULL; /* all data from all sources */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pa", &filename,
 		&filename_length, &zv_arr_options) == FAILURE) {
@@ -405,10 +405,10 @@ PHP_FUNCTION(rrd_xport)
 	rrd_args *argv;
 	/* return values from rrd_xport */
 	int xxsize;
-	time_t start, end, time_index;
-	unsigned long step, outvar_count;
-	char **legend_v;
-	rrd_value_t *data, *data_ptr;
+	time_t start = 0, end = 0, time_index;
+	unsigned long step = 0, outvar_count = 0;
+	char **legend_v = NULL;
+	rrd_value_t *data = NULL, *data_ptr;
 	zval zv_data;
 	zend_ulong outvar_index;
 
@@ -442,14 +442,12 @@ PHP_FUNCTION(rrd_xport)
 	add_assoc_long(return_value, "step", step);
 
 	/* no data available */
-	if (!data || !step) {
+	if (!data || !legend_v || !step) {
 		add_assoc_null(return_value, "data");
-		if (legend_v) {
-			for (outvar_index = 0; outvar_index < outvar_count; outvar_index++) {
-				free(legend_v[outvar_index]);
-			}
-			free(legend_v);
+		for (outvar_index = 0; legend_v && outvar_index < outvar_count; outvar_index++) {
+			free(legend_v[outvar_index]);
 		}
+		free(legend_v);
 		free(data);
 		return;
 	}

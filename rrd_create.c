@@ -132,6 +132,7 @@ PHP_METHOD(RRDCreator, __construct)
 
 	intern_obj = php_rrd_create_fetch_object(Z_OBJ_P(getThis()));
 	if (intern_obj->file_path) efree(intern_obj->file_path);
+	intern_obj->file_path = NULL;
 	if (intern_obj->start_time) efree(intern_obj->start_time);
 	intern_obj->start_time = NULL;
 
@@ -149,7 +150,7 @@ PHP_METHOD(RRDCreator, __construct)
 		ZVAL_UNDEF(&intern_obj->zv_arr_archives);
 	}
 
-	intern_obj->file_path = estrdup(path);
+	intern_obj->file_path = estrndup(path, path_length);
 	if (start_time) intern_obj->start_time = estrndup(ZSTR_VAL(start_time), ZSTR_LEN(start_time));
 	if (step) {
 		ZVAL_LONG(&intern_obj->zv_step, step);

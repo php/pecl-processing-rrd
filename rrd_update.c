@@ -95,6 +95,7 @@ PHP_METHOD(RRDUpdater, __construct)
 
 	intern_obj = php_rrd_update_fetch_object(Z_OBJ_P(getThis()));
 	if (intern_obj->file_path) efree(intern_obj->file_path);
+	intern_obj->file_path = NULL;
 	intern_obj->file_path = estrndup(path, path_length);
 }
 /* }}} */
