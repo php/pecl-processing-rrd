@@ -61,6 +61,7 @@ PHP_FUNCTION(rrd_fetch)
 	time_t start, end;
 	unsigned long step,
 	ds_cnt; /* count of data sources */
+	unsigned ds_counter;
 	char **ds_namv; /* list of data source names */
 	rrd_value_t *ds_data; /* all data from all sources */
 
@@ -95,11 +96,11 @@ PHP_FUNCTION(rrd_fetch)
 	/* add "ds_namv" and "data" array into return values if there is any
 	 * result data
 	 */
-	if (!ds_data || !ds_namv || !ds_cnt) {
+	if (!ds_data || !ds_namv || !ds_cnt || !step) {
 		add_assoc_null(return_value, "data");
 	} else {
 		rrd_value_t *datap = ds_data;
-		unsigned timestamp, ds_counter;
+		time_t timestamp;
 		/* final array for all data from all data sources */
 		zval zv_data_array;
 
@@ -124,8 +125,11 @@ PHP_FUNCTION(rrd_fetch)
 				/* pointer for one data source retrieved data */
 				zval *ds_data_array;
 				/* value for key (timestamp) in data array */
-				char str_timestamp[11];
-				ZEND_LTOA((zend_ulong)timestamp, str_timestamp, sizeof(str_timestamp));
+				/* time_t is wider than zend_long on 32-bit builds, so
+				   this cannot go through ZEND_LONG_FMT */
+				char str_timestamp[24];
+				snprintf(str_timestamp, sizeof(str_timestamp),
+					"%" PRId64, (int64_t)timestamp);
 
 				/* gets pointer for data source result array */
 				ds_data_array = zend_hash_get_current_data(Z_ARRVAL(zv_data_array));
@@ -135,9 +139,11 @@ PHP_FUNCTION(rrd_fetch)
 			}
 		}
 		add_assoc_zval(return_value, "data", &zv_data_array);
+	}
 
-		/* free data from rrd_fetch */
-		free(ds_data);
+	/* free data from rrd_fetch */
+	free(ds_data);
+	if (ds_namv) {
 		for (ds_counter = 0; ds_counter < ds_cnt; ds_counter++) {
 			free(ds_namv[ds_counter]);
 		}
@@ -436,8 +442,15 @@ PHP_FUNCTION(rrd_xport)
 	add_assoc_long(return_value, "step", step);
 
 	/* no data available */
-	if (!data) {
+	if (!data || !step) {
 		add_assoc_null(return_value, "data");
+		if (legend_v) {
+			for (outvar_index = 0; outvar_index < outvar_count; outvar_index++) {
+				free(legend_v[outvar_index]);
+			}
+			free(legend_v);
+		}
+		free(data);
 		return;
 	}
 
@@ -463,8 +476,9 @@ PHP_FUNCTION(rrd_xport)
 		data_ptr = data + outvar_index;
 		for (time_index = start + step; time_index <= end; time_index += step) {
 			/* value for key (timestamp) in data array */
-			char str_timestamp[11];
-			ZEND_LTOA((zend_ulong)time_index, str_timestamp, sizeof(str_timestamp));
+			char str_timestamp[24];
+			snprintf(str_timestamp, sizeof(str_timestamp),
+				"%" PRId64, (int64_t)time_index);
 
 			add_assoc_double(&time_data, str_timestamp, *data_ptr);
 			data_ptr += outvar_count;
