@@ -60,7 +60,7 @@ static void rrd_graph_object_dtor(zend_object *object)
 		efree(intern_obj->file_path);
 	}
 	if (!Z_ISUNDEF(intern_obj->zv_arr_options)) {
-		zval_dtor(&intern_obj->zv_arr_options);
+		zval_ptr_dtor_nogc(&intern_obj->zv_arr_options);
 	}
 
 	zend_object_std_dtor(&intern_obj->std);
@@ -120,7 +120,7 @@ PHP_METHOD(RRDGraph, setOptions)
 
 	/* if our array is initialized, so delete it first */
 	if (!Z_ISUNDEF(intern_obj->zv_arr_options)) {
-		zval_dtor(&intern_obj->zv_arr_options);
+		zval_ptr_dtor_nogc(&intern_obj->zv_arr_options);
 	}
 
 	/* copy array from parameter */
@@ -169,7 +169,7 @@ static rrd_args *rrd_graph_obj_create_argv(const char *command_name, const rrd_g
 	} ZEND_HASH_FOREACH_END();
 
 	result = rrd_args_init_by_phparray(command_name, obj->file_path, &zv_argv);
-	zval_dtor(&zv_argv);
+	zval_ptr_dtor_nogc(&zv_argv);
 
 	return result;
 }

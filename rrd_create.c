@@ -63,11 +63,11 @@ static void rrd_create_object_dtor(zend_object *object)
 	if (intern_obj->start_time)
 		efree(intern_obj->start_time);
 	if (!Z_ISUNDEF(intern_obj->zv_step))
-		zval_dtor(&intern_obj->zv_step);
+		zval_ptr_dtor_nogc(&intern_obj->zv_step);
 	if (!Z_ISUNDEF(intern_obj->zv_arr_data_sources))
-		zval_dtor(&intern_obj->zv_arr_data_sources);
+		zval_ptr_dtor_nogc(&intern_obj->zv_arr_data_sources);
 	if (!Z_ISUNDEF(intern_obj->zv_arr_archives))
-		zval_dtor(&intern_obj->zv_arr_archives);
+		zval_ptr_dtor_nogc(&intern_obj->zv_arr_archives);
 
 	zend_object_std_dtor(&intern_obj->std);
 }
@@ -255,7 +255,7 @@ PHP_METHOD(RRDCreator, save)
 	create_argv = rrd_args_init_by_phparray("create", intern_obj->file_path, &zv_create_argv);
 	if (!create_argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
-		zval_dtor(&zv_create_argv);
+		zval_ptr_dtor_nogc(&zv_create_argv);
 		RETURN_FALSE;
 	}
 
@@ -263,7 +263,7 @@ PHP_METHOD(RRDCreator, save)
 
 	/* call rrd_create and test if fails */
 	if (rrd_create(create_argv->count - 1, &create_argv->args[1]) == -1) {
-		zval_dtor(&zv_create_argv);
+		zval_ptr_dtor_nogc(&zv_create_argv);
 		rrd_args_free(create_argv);
 
 		/* throw exception with rrd error string */
@@ -272,7 +272,7 @@ PHP_METHOD(RRDCreator, save)
 		return;
 	}
 
-	zval_dtor(&zv_create_argv);
+	zval_ptr_dtor_nogc(&zv_create_argv);
 	rrd_args_free(create_argv);
 	RETURN_TRUE;
 }
