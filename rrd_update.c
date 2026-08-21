@@ -118,7 +118,7 @@ PHP_METHOD(RRDUpdater, update)
 	size_t time_str_length = 1;
 
 	int argc = ZEND_NUM_ARGS();
-	zend_string *zs_ds_name;
+	zend_string *zs_ds_name, *zs_ds_val;
 	zval *zv_ds_val;
 
 	/* string for all data source names formated for rrd_update call */
@@ -166,17 +166,16 @@ PHP_METHOD(RRDUpdater, update)
 			smart_string_appends(&ds_names, "--template=");
 		}
 
-		smart_string_appends(&ds_names, ZSTR_VAL(zs_ds_name));
+		smart_string_appendl(&ds_names, ZSTR_VAL(zs_ds_name), ZSTR_LEN(zs_ds_name));
 
 		/* "timestamp:ds1Value:ds2Value" string */
 		if (!ds_vals.len) {
 			smart_string_appends(&ds_vals, time);
 		}
 		smart_string_appendc(&ds_vals, ':');
-		if (Z_TYPE_P(zv_ds_val) != IS_STRING) {
-			convert_to_string(zv_ds_val);
-		}
-		smart_string_appendl(&ds_vals, Z_STRVAL_P(zv_ds_val), Z_STRLEN_P(zv_ds_val));
+		zs_ds_val = zval_get_string(zv_ds_val);
+		smart_string_appendl(&ds_vals, ZSTR_VAL(zs_ds_val), ZSTR_LEN(zs_ds_val));
+		zend_string_release(zs_ds_val);
 	} ZEND_HASH_FOREACH_END();
 	smart_string_0(&ds_names);
 	smart_string_0(&ds_vals);
