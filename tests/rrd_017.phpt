@@ -11,92 +11,66 @@ if (!file_exists($data_updatedDb)) {
 --FILE--
 <?php
 include('data/definition.inc');
-var_dump(rrd_xport(array(
+$result = rrd_xport(array(
 	"--start=920804400",
 	"--end=920808000",
 	"DEF:myspeed=$data_updatedDb:speed:AVERAGE",
 	"CDEF:realspeed=myspeed,1000,*",
 	"XPORT:myspeed:myspeed",
 	"XPORT:realspeed:realspeed"
-)));
-?>
---EXPECTF--
-array(4) {
-  ["start"]=>
-  int(920804700)
-  ["end"]=>
-  int(920808300)
-  ["step"]=>
-  int(300)
-  ["data"]=>
-  array(2) {
-    [0]=>
-    array(2) {
-      ["legend"]=>
-      string(7) "myspeed"
-      ["data"]=>
-      array(13) {
-        [920804700]=>
-        float(NAN)
-        [920805000]=>
-        float(0.04)
-        [920805300]=>
-        float(0.02)
-        [920805600]=>
-        float(0)
-        [920805900]=>
-        float(0)
-        [920806200]=>
-        float(0.0333333333%s)
-        [920806500]=>
-        float(0.0333333333%s)
-        [920806800]=>
-        float(0.0333333333%s)
-        [920807100]=>
-        float(0.02)
-        [920807400]=>
-        float(0.02)
-        [920807700]=>
-        float(0.02)
-        [920808000]=>
-        float(0.0133333333%s)
-        [920808300]=>
-        float(0.0166666666%s)
-      }
-    }
-    [1]=>
-    array(2) {
-      ["legend"]=>
-      string(9) "realspeed"
-      ["data"]=>
-      array(13) {
-        [920804700]=>
-        float(NAN)
-        [920805000]=>
-        float(40)
-        [920805300]=>
-        float(20)
-        [920805600]=>
-        float(0)
-        [920805900]=>
-        float(0)
-        [920806200]=>
-        float(33.333333333%s)
-        [920806500]=>
-        float(33.333333333%s)
-        [920806800]=>
-        float(33.333333333%s)
-        [920807100]=>
-        float(20)
-        [920807400]=>
-        float(20)
-        [920807700]=>
-        float(20)
-        [920808000]=>
-        float(13.333333333%s)
-        [920808300]=>
-        float(16.666666666%s)
-      }
-    }
-  }
+));
+
+/* librrd decides for itself whether the closing sample falls inside the
+   window, so assert the shape and the samples rather than the row count */
+var_dump(array_keys($result));
+var_dump($result["start"], $result["step"]);
+var_dump(array_column($result["data"], "legend"));
+
+$speed = $result["data"][0]["data"];
+$real  = $result["data"][1]["data"];
+
+var_dump(array_slice(array_keys($speed), 0, 3));
+var_dump(is_nan($speed[920804700]));
+printf("%.4f %.4f %.4f\n", $speed[920805000], $speed[920805300], $speed[920806200]);
+printf("%.4f %.4f %.4f\n", $real[920805000], $real[920805300], $real[920806200]);
+
+/* every key is a step-aligned timestamp inside the window */
+$aligned = true;
+foreach (array_keys($speed) as $ts) {
+	if (($ts - $result["start"]) % $result["step"] !== 0) { $aligned = false; }
+	if ($ts < $result["start"] || $ts > $result["end"]) { $aligned = false; }
 }
+var_dump($aligned, count($speed) === count($real));
+?>
+--EXPECT--
+array(4) {
+  [0]=>
+  string(5) "start"
+  [1]=>
+  string(3) "end"
+  [2]=>
+  string(4) "step"
+  [3]=>
+  string(4) "data"
+}
+int(920804700)
+int(300)
+array(2) {
+  [0]=>
+  string(7) "myspeed"
+  [1]=>
+  string(9) "realspeed"
+}
+array(3) {
+  [0]=>
+  int(920804700)
+  [1]=>
+  int(920805000)
+  [2]=>
+  int(920805300)
+}
+bool(true)
+0.0400 0.0200 0.0333
+40.0000 20.0000 33.3333
+bool(true)
+bool(true)

@@ -22,4 +22,3 @@ var_dump(rrd_tune($destFile, array("true")));
 bool(true)
 bool(false)
 bool(true)
-%s

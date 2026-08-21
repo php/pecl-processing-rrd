@@ -44,7 +44,7 @@ typedef struct _rrd_update_object {
  * fetch our custom object from user space object
  */
 static inline rrd_update_object *php_rrd_update_fetch_object(zend_object *obj) {
-	return (rrd_update_object *)((char*)(obj) - XtOffsetOf(rrd_update_object, std));
+	return (rrd_update_object *)((char*)(obj) - offsetof(rrd_update_object, std));
 } 
 
 /* {{{ rrd_update_object_dtor
@@ -94,7 +94,9 @@ PHP_METHOD(RRDUpdater, __construct)
 	}
 
 	intern_obj = php_rrd_update_fetch_object(Z_OBJ_P(getThis()));
-	intern_obj->file_path = estrdup(path);
+	if (intern_obj->file_path) efree(intern_obj->file_path);
+	intern_obj->file_path = NULL;
+	intern_obj->file_path = estrndup(path, path_length);
 }
 /* }}} */
 
@@ -117,8 +119,13 @@ PHP_METHOD(RRDUpdater, update)
 	size_t time_str_length = 1;
 
 	int argc = ZEND_NUM_ARGS();
-	zend_string *zs_ds_name;
+	zend_string *zs_ds_name, *zs_ds_val;
 	zval *zv_ds_val;
+	HashTable *values_ht;
+	/* __construct is callable again, so a __toString below could repoint the
+	 * object after the open_basedir check; work from a snapshot instead
+	 */
+	char *checked_path;
 
 	/* string for all data source names formated for rrd_update call */
 	smart_string ds_names = {0};
@@ -136,34 +143,64 @@ PHP_METHOD(RRDUpdater, update)
 
 	intern_obj = php_rrd_update_fetch_object(Z_OBJ_P(getThis()));
 
+	if (!intern_obj->file_path) {
+		zend_throw_exception(NULL, "the object was not constructed", 0);
+		return;
+	}
+
 	if (php_check_open_basedir(intern_obj->file_path)) {
 		RETURN_FALSE;
 	}
+	checked_path = estrdup(intern_obj->file_path);
 
 	if (argc > 1 && time_str_length == 0) {
+		efree(checked_path);
 		zend_throw_exception(NULL, "time cannot be empty string", 0);
 		return;
 	}
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zv_values_array), zs_ds_name, zv_ds_val) {
+	/* converting a value runs __toString, which must not free this array */
+	values_ht = Z_ARRVAL_P(zv_values_array);
+	GC_ADDREF(values_ht);
+
+	ZEND_HASH_FOREACH_STR_KEY_VAL(values_ht, zs_ds_name, zv_ds_val) {
+		if (!zs_ds_name) {
+			smart_string_free(&ds_names);
+			smart_string_free(&ds_vals);
+			zend_array_release(values_ht);
+			efree(checked_path);
+			zend_throw_exception(NULL,
+				"values array must be keyed by data source name", 0);
+			return;
+		}
+
 		if (ds_names.len) {
 			smart_string_appendc(&ds_names, ':');
 		} else {
 			smart_string_appends(&ds_names, "--template=");
 		}
 
-		smart_string_appends(&ds_names, ZSTR_VAL(zs_ds_name));
+		smart_string_appendl(&ds_names, ZSTR_VAL(zs_ds_name), ZSTR_LEN(zs_ds_name));
 
 		/* "timestamp:ds1Value:ds2Value" string */
 		if (!ds_vals.len) {
 			smart_string_appends(&ds_vals, time);
 		}
 		smart_string_appendc(&ds_vals, ':');
-		if (Z_TYPE_P(zv_ds_val) != IS_STRING) {
-			convert_to_string(zv_ds_val);
+		zs_ds_val = zval_try_get_string(zv_ds_val);
+		if (!zs_ds_val) {
+			smart_string_free(&ds_names);
+			smart_string_free(&ds_vals);
+			zend_array_release(values_ht);
+			efree(checked_path);
+			return;
 		}
-		smart_string_appendl(&ds_vals, Z_STRVAL_P(zv_ds_val), Z_STRLEN_P(zv_ds_val));
+		smart_string_appendl(&ds_vals, ZSTR_VAL(zs_ds_val), ZSTR_LEN(zs_ds_val));
+		zend_string_release(zs_ds_val);
 	} ZEND_HASH_FOREACH_END();
+
+	zend_array_release(values_ht);
+
 	smart_string_0(&ds_names);
 	smart_string_0(&ds_vals);
 
@@ -176,11 +213,11 @@ PHP_METHOD(RRDUpdater, update)
 	smart_string_free(&ds_names);
 	smart_string_free(&ds_vals);
 
-	update_argv = rrd_args_init_by_phparray("update", intern_obj->file_path, &zv_update_argv);
+	update_argv = rrd_args_init_by_phparray("update", checked_path, &zv_update_argv);
+	efree(checked_path);
 	if (!update_argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
-		zval_dtor(&zv_update_argv);
-		if (time_str_length == 0) efree(time);
+		zval_ptr_dtor_nogc(&zv_update_argv);
 		RETURN_FALSE;
 	}
 
@@ -188,7 +225,7 @@ PHP_METHOD(RRDUpdater, update)
 
 	/* call rrd_update and test if fails */
 	if (rrd_update(update_argv->count - 1, &update_argv->args[1]) == -1) {
-		zval_dtor(&zv_update_argv);
+		zval_ptr_dtor_nogc(&zv_update_argv);
 		rrd_args_free(update_argv);
 
 		/* throw exception with rrd error string */
@@ -197,7 +234,7 @@ PHP_METHOD(RRDUpdater, update)
 		return;
 	}
 
-	zval_dtor(&zv_update_argv);
+	zval_ptr_dtor_nogc(&zv_update_argv);
 	rrd_args_free(update_argv);
 
 	RETURN_TRUE;
@@ -265,6 +302,6 @@ void rrd_update_minit()
 
 	memcpy(&rrd_update_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	rrd_update_handlers.clone_obj = NULL;
-	rrd_update_handlers.offset = XtOffsetOf(rrd_update_object, std);
+	rrd_update_handlers.offset = offsetof(rrd_update_object, std);
 	rrd_update_handlers.free_obj = rrd_update_object_dtor;
 }
