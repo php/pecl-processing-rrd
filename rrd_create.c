@@ -47,7 +47,7 @@ typedef struct _rrd_create_object {
  * fetch our custom object from user space object
  */
 static inline rrd_create_object *php_rrd_create_fetch_object(zend_object *obj) {
-	return (rrd_create_object *)((char*)(obj) - XtOffsetOf(rrd_create_object, std));
+	return (rrd_create_object *)((char*)(obj) - offsetof(rrd_create_object, std));
 } 
 
 /* {{{ rrd_create_object_dtor
@@ -345,6 +345,6 @@ void rrd_create_minit()
 
 	memcpy(&rrd_create_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	rrd_create_handlers.clone_obj = NULL;
-	rrd_create_handlers.offset = XtOffsetOf(rrd_create_object, std);
+	rrd_create_handlers.offset = offsetof(rrd_create_object, std);
 	rrd_create_handlers.free_obj = rrd_create_object_dtor; 
 }

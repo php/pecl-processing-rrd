@@ -44,7 +44,7 @@ typedef struct _rrd_update_object {
  * fetch our custom object from user space object
  */
 static inline rrd_update_object *php_rrd_update_fetch_object(zend_object *obj) {
-	return (rrd_update_object *)((char*)(obj) - XtOffsetOf(rrd_update_object, std));
+	return (rrd_update_object *)((char*)(obj) - offsetof(rrd_update_object, std));
 } 
 
 /* {{{ rrd_update_object_dtor
@@ -265,6 +265,6 @@ void rrd_update_minit()
 
 	memcpy(&rrd_update_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	rrd_update_handlers.clone_obj = NULL;
-	rrd_update_handlers.offset = XtOffsetOf(rrd_update_object, std);
+	rrd_update_handlers.offset = offsetof(rrd_update_object, std);
 	rrd_update_handlers.free_obj = rrd_update_object_dtor;
 }

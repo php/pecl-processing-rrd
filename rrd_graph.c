@@ -45,7 +45,7 @@ typedef struct _rrd_graph_object {
  * fetch our custom object from user space object
  */
 static inline rrd_graph_object *php_rrd_graph_fetch_object(zend_object *obj) {
-	return (rrd_graph_object *)((char*)(obj) - XtOffsetOf(rrd_graph_object, std));
+	return (rrd_graph_object *)((char*)(obj) - offsetof(rrd_graph_object, std));
 } 
 
 /* {{{ rrd_graph_object_dtor
@@ -391,6 +391,6 @@ void rrd_graph_minit()
 
 	memcpy(&rrd_graph_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	rrd_graph_handlers.clone_obj = NULL;
-	rrd_graph_handlers.offset = XtOffsetOf(rrd_graph_object, std);
+	rrd_graph_handlers.offset = offsetof(rrd_graph_object, std);
 	rrd_graph_handlers.free_obj = rrd_graph_object_dtor; 
 }
