@@ -131,8 +131,9 @@ PHP_FUNCTION(rrd_fetch)
 				snprintf(str_timestamp, sizeof(str_timestamp),
 					"%" PRId64, (int64_t)timestamp);
 
-				/* gets pointer for data source result array */
+					/* gets pointer for data source result array */
 				ds_data_array = zend_hash_get_current_data(Z_ARRVAL(zv_data_array));
+				if (!ds_data_array) break;
 
 				add_assoc_double(ds_data_array, str_timestamp, *(datap++));
 				zend_hash_move_forward(Z_ARRVAL(zv_data_array));
