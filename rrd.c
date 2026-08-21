@@ -683,7 +683,13 @@ rrd_args *rrd_args_init_by_phparray(const char *command_name, const char *filena
 
 		/* force using strings as array items */
 		item = zend_hash_get_current_data(Z_ARRVAL_P(options));
-		item_str = zval_get_string(item);
+		item_str = zval_try_get_string(item);
+		if (!item_str) {
+			smart_string_free(&option);
+			result->count = args_counter;
+			rrd_args_free(result);
+			return NULL;
+		}
 		smart_string_appendl(&option, ZSTR_VAL(item_str), ZSTR_LEN(item_str));
 		smart_string_0(&option);
 		zend_string_release(item_str);

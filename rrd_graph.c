@@ -147,6 +147,7 @@ static rrd_args *rrd_graph_obj_create_argv(const char *command_name, const rrd_g
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(obj->zv_arr_options), num_key, zs_key, zv_option_val) {
 		(void)num_key; /* to avoid -Wunused-but-set-variable */
 		smart_string option = {0}; /* one argument option */
+		zend_string *option_str;
 
 		/* option with string key means long option, hence they are used as
 		 * "key=value" e.g. "--start=920804400"
@@ -157,7 +158,12 @@ static rrd_args *rrd_graph_obj_create_argv(const char *command_name, const rrd_g
 		}
 
 		/* use always string for option value */
-		zend_string *option_str = zval_get_string(zv_option_val);
+		option_str = zval_try_get_string(zv_option_val);
+		if (!option_str) {
+			smart_string_free(&option);
+			zval_dtor(&zv_argv);
+			return NULL;
+		}
 
 		smart_string_appendl(&option, ZSTR_VAL(option_str), ZSTR_LEN(option_str));
 		smart_string_0(&option);
