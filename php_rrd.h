@@ -24,6 +24,13 @@ extern zend_module_entry rrd_module_entry;
 # define zend_parse_parameters_none() zend_parse_parameters(ZEND_NUM_ARGS(), "")
 #endif 
 
+/* librrd took char ** for argv before 1.9 and const char ** from 1.9 on */
+#ifdef HAVE_RRD_CONST_ARGV
+# define RRD_ARGV(argv) ((const char **)(argv))
+#else
+# define RRD_ARGV(argv) (argv)
+#endif
+
 typedef struct _rrd_args {
 	int count;
 	char **args;
