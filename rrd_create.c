@@ -241,6 +241,10 @@ PHP_METHOD(RRDCreator, save)
 		return;
 	}
 
+	if (php_check_open_basedir(intern_obj->file_path)) {
+		RETURN_FALSE;
+	}
+
 	array_init(&zv_create_argv);
 
 	if (intern_obj->start_time) {
