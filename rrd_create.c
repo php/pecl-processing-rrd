@@ -47,7 +47,7 @@ typedef struct _rrd_create_object {
  * fetch our custom object from user space object
  */
 static inline rrd_create_object *php_rrd_create_fetch_object(zend_object *obj) {
-	return (rrd_create_object *)((char*)(obj) - XtOffsetOf(rrd_create_object, std));
+	return (rrd_create_object *)((char*)(obj) - offsetof(rrd_create_object, std));
 } 
 
 /* {{{ rrd_create_object_dtor
@@ -63,11 +63,11 @@ static void rrd_create_object_dtor(zend_object *object)
 	if (intern_obj->start_time)
 		efree(intern_obj->start_time);
 	if (!Z_ISUNDEF(intern_obj->zv_step))
-		zval_dtor(&intern_obj->zv_step);
+		zval_ptr_dtor_nogc(&intern_obj->zv_step);
 	if (!Z_ISUNDEF(intern_obj->zv_arr_data_sources))
-		zval_dtor(&intern_obj->zv_arr_data_sources);
+		zval_ptr_dtor_nogc(&intern_obj->zv_arr_data_sources);
 	if (!Z_ISUNDEF(intern_obj->zv_arr_archives))
-		zval_dtor(&intern_obj->zv_arr_archives);
+		zval_ptr_dtor_nogc(&intern_obj->zv_arr_archives);
 
 	zend_object_std_dtor(&intern_obj->std);
 }
@@ -104,7 +104,7 @@ PHP_METHOD(RRDCreator, __construct)
 	rrd_create_object *intern_obj;
 	char *path; size_t path_length;
 	/* better to set defaults for optional parameters */
-	zend_string *start_time;
+	zend_string *start_time = NULL;
 	long step = 0;
 	int argc = ZEND_NUM_ARGS();
 
@@ -131,8 +131,27 @@ PHP_METHOD(RRDCreator, __construct)
 	}
 
 	intern_obj = php_rrd_create_fetch_object(Z_OBJ_P(getThis()));
+	if (intern_obj->file_path) efree(intern_obj->file_path);
+	intern_obj->file_path = NULL;
+	if (intern_obj->start_time) efree(intern_obj->start_time);
+	intern_obj->start_time = NULL;
+
+	/* a second __construct otherwise inherits the previous step and sources */
+	if (!Z_ISUNDEF(intern_obj->zv_step)) {
+		zval_ptr_dtor_nogc(&intern_obj->zv_step);
+		ZVAL_UNDEF(&intern_obj->zv_step);
+	}
+	if (!Z_ISUNDEF(intern_obj->zv_arr_data_sources)) {
+		zval_ptr_dtor_nogc(&intern_obj->zv_arr_data_sources);
+		ZVAL_UNDEF(&intern_obj->zv_arr_data_sources);
+	}
+	if (!Z_ISUNDEF(intern_obj->zv_arr_archives)) {
+		zval_ptr_dtor_nogc(&intern_obj->zv_arr_archives);
+		ZVAL_UNDEF(&intern_obj->zv_arr_archives);
+	}
+
 	intern_obj->file_path = estrdup(path);
-	if (start_time) intern_obj->start_time = estrdup(ZSTR_VAL(start_time));
+	if (start_time) intern_obj->start_time = estrndup(ZSTR_VAL(start_time), ZSTR_LEN(start_time));
 	if (step) {
 		ZVAL_LONG(&intern_obj->zv_step, step);
 	}
@@ -218,6 +237,15 @@ PHP_METHOD(RRDCreator, save)
 	zval zv_create_argv;
 	rrd_args *create_argv;
 
+	if (!intern_obj->file_path) {
+		zend_throw_exception(NULL, "the object was not constructed", 0);
+		return;
+	}
+
+	if (php_check_open_basedir(intern_obj->file_path)) {
+		RETURN_FALSE;
+	}
+
 	array_init(&zv_create_argv);
 
 	if (intern_obj->start_time) {
@@ -249,21 +277,25 @@ PHP_METHOD(RRDCreator, save)
 	}
 
 	/* add array of archive and data source strings into argument list */
-	php_array_merge(Z_ARRVAL(zv_create_argv), Z_ARRVAL(intern_obj->zv_arr_data_sources));
-	php_array_merge(Z_ARRVAL(zv_create_argv), Z_ARRVAL(intern_obj->zv_arr_archives));
+	if (!Z_ISUNDEF(intern_obj->zv_arr_data_sources)) {
+		php_array_merge(Z_ARRVAL(zv_create_argv), Z_ARRVAL(intern_obj->zv_arr_data_sources));
+	}
+	if (!Z_ISUNDEF(intern_obj->zv_arr_archives)) {
+		php_array_merge(Z_ARRVAL(zv_create_argv), Z_ARRVAL(intern_obj->zv_arr_archives));
+	}
 
 	create_argv = rrd_args_init_by_phparray("create", intern_obj->file_path, &zv_create_argv);
 	if (!create_argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
-		zval_dtor(&zv_create_argv);
+		zval_ptr_dtor_nogc(&zv_create_argv);
 		RETURN_FALSE;
 	}
 
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_create and test if fails */
-	if (rrd_create(create_argv->count - 1, &create_argv->args[1]) == -1) {
-		zval_dtor(&zv_create_argv);
+	if (rrd_create(create_argv->count - 1, RRD_ARGV(&create_argv->args[1])) == -1) {
+		zval_ptr_dtor_nogc(&zv_create_argv);
 		rrd_args_free(create_argv);
 
 		/* throw exception with rrd error string */
@@ -272,7 +304,7 @@ PHP_METHOD(RRDCreator, save)
 		return;
 	}
 
-	zval_dtor(&zv_create_argv);
+	zval_ptr_dtor_nogc(&zv_create_argv);
 	rrd_args_free(create_argv);
 	RETURN_TRUE;
 }
@@ -303,7 +335,7 @@ PHP_FUNCTION(rrd_create)
 
 	if (rrd_test_error()) rrd_clear_error();
 
-	if (rrd_create(argv->count - 1, &argv->args[1]) == -1 ) {
+	if (rrd_create(argv->count - 1, RRD_ARGV(&argv->args[1])) == -1 ) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;
@@ -345,6 +377,6 @@ void rrd_create_minit()
 
 	memcpy(&rrd_create_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	rrd_create_handlers.clone_obj = NULL;
-	rrd_create_handlers.offset = XtOffsetOf(rrd_create_object, std);
+	rrd_create_handlers.offset = offsetof(rrd_create_object, std);
 	rrd_create_handlers.free_obj = rrd_create_object_dtor; 
 }

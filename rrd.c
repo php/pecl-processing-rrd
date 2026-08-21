@@ -61,6 +61,7 @@ PHP_FUNCTION(rrd_fetch)
 	time_t start, end;
 	unsigned long step,
 	ds_cnt; /* count of data sources */
+	unsigned ds_counter;
 	char **ds_namv; /* list of data source names */
 	rrd_value_t *ds_data; /* all data from all sources */
 
@@ -80,7 +81,7 @@ PHP_FUNCTION(rrd_fetch)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_fetch and test if fails */
-	if (rrd_fetch(argv->count - 1, &argv->args[1], &start, &end, &step, &ds_cnt,
+	if (rrd_fetch(argv->count - 1, RRD_ARGV(&argv->args[1]), &start, &end, &step, &ds_cnt,
 		&ds_namv, &ds_data) == -1 ) {
 		rrd_args_free(argv);
 		RETURN_FALSE;
@@ -95,11 +96,11 @@ PHP_FUNCTION(rrd_fetch)
 	/* add "ds_namv" and "data" array into return values if there is any
 	 * result data
 	 */
-	if (!ds_data || !ds_namv || !ds_cnt) {
+	if (!ds_data || !ds_namv || !ds_cnt || !step) {
 		add_assoc_null(return_value, "data");
 	} else {
 		rrd_value_t *datap = ds_data;
-		unsigned timestamp, ds_counter;
+		time_t timestamp;
 		/* final array for all data from all data sources */
 		zval zv_data_array;
 
@@ -124,20 +125,26 @@ PHP_FUNCTION(rrd_fetch)
 				/* pointer for one data source retrieved data */
 				zval *ds_data_array;
 				/* value for key (timestamp) in data array */
-				char str_timestamp[11];
-				ZEND_LTOA((zend_ulong)timestamp, str_timestamp, sizeof(str_timestamp));
+				/* time_t is wider than zend_long on 32-bit builds, so
+				   this cannot go through ZEND_LONG_FMT */
+				char str_timestamp[24];
+				snprintf(str_timestamp, sizeof(str_timestamp),
+					"%" PRId64, (int64_t)timestamp);
 
-				/* gets pointer for data source result array */
+					/* gets pointer for data source result array */
 				ds_data_array = zend_hash_get_current_data(Z_ARRVAL(zv_data_array));
+				if (!ds_data_array) break;
 
 				add_assoc_double(ds_data_array, str_timestamp, *(datap++));
 				zend_hash_move_forward(Z_ARRVAL(zv_data_array));
 			}
 		}
 		add_assoc_zval(return_value, "data", &zv_data_array);
+	}
 
-		/* free data from rrd_fetch */
-		free(ds_data);
+	/* free data from rrd_fetch */
+	free(ds_data);
+	if (ds_namv) {
 		for (ds_counter = 0; ds_counter < ds_cnt; ds_counter++) {
 			free(ds_namv[ds_counter]);
 		}
@@ -249,7 +256,7 @@ PHP_FUNCTION(rrd_lastupdate)
 	if (rrd_lastupdate_r(argv[2], &last_update, &ds_cnt, &ds_namv,
 		&last_ds) == -1) {
 #else
- 	if (rrd_lastupdate(2, &argv[1], &last_update, &ds_cnt, &ds_namv,
+ 	if (rrd_lastupdate(2, RRD_ARGV(&argv[1]), &last_update, &ds_cnt, &ds_namv,
  		&last_ds) == -1) {
 #endif
 		efree(argv[2]); efree(argv[1]);
@@ -334,19 +341,19 @@ PHP_FUNCTION(rrd_restore)
 	argv = rrd_args_init_by_phparray("restore", xml_filename, &zv_options);
 	if (!argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
-		zval_dtor(&zv_options);
+		zval_ptr_dtor_nogc(&zv_options);
 		RETURN_FALSE;
 	}
 
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_ restore and test if fails */
-	if (rrd_restore(argv->count-1, &argv->args[1]) == -1) {
+	if (rrd_restore(argv->count-1, RRD_ARGV(&argv->args[1])) == -1) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;
 	}
-	zval_dtor(&zv_options);
+	zval_ptr_dtor_nogc(&zv_options);
 	rrd_args_free(argv);
 }
 /* }}} */
@@ -381,7 +388,7 @@ PHP_FUNCTION(rrd_tune)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_tune and test if fails */
-	if (rrd_tune(argv->count-1, &argv->args[1]) == -1 ) {
+	if (rrd_tune(argv->count-1, RRD_ARGV(&argv->args[1])) == -1 ) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;
@@ -419,7 +426,7 @@ PHP_FUNCTION(rrd_xport)
 	if (rrd_test_error()) rrd_clear_error();
 
 	/* call rrd_xport and test if fails */
-	if (rrd_xport(argv->count-1, &argv->args[1], &xxsize, &start, &end, &step,
+	if (rrd_xport(argv->count-1, RRD_ARGV(&argv->args[1]), &xxsize, &start, &end, &step,
 		&outvar_count, &legend_v, &data) == -1) {
 		php_printf("rrd_xport failed");
 		rrd_args_free(argv);
@@ -436,8 +443,15 @@ PHP_FUNCTION(rrd_xport)
 	add_assoc_long(return_value, "step", step);
 
 	/* no data available */
-	if (!data) {
+	if (!data || !step) {
 		add_assoc_null(return_value, "data");
+		if (legend_v) {
+			for (outvar_index = 0; outvar_index < outvar_count; outvar_index++) {
+				free(legend_v[outvar_index]);
+			}
+			free(legend_v);
+		}
+		free(data);
 		return;
 	}
 
@@ -463,8 +477,9 @@ PHP_FUNCTION(rrd_xport)
 		data_ptr = data + outvar_index;
 		for (time_index = start + step; time_index <= end; time_index += step) {
 			/* value for key (timestamp) in data array */
-			char str_timestamp[11];
-			ZEND_LTOA((zend_ulong)time_index, str_timestamp, sizeof(str_timestamp));
+			char str_timestamp[24];
+			snprintf(str_timestamp, sizeof(str_timestamp),
+				"%" PRId64, (int64_t)time_index);
 
 			add_assoc_double(&time_data, str_timestamp, *data_ptr);
 			data_ptr += outvar_count;
@@ -664,13 +679,21 @@ rrd_args *rrd_args_init_by_phparray(const char *command_name, const char *filena
 	zend_hash_internal_pointer_reset(Z_ARRVAL_P(options));
 	for (i=0; i < option_count; i++) {
 		zval *item;
+		zend_string *item_str;
 		smart_string option = {0}; /* one argument option */
 
 		/* force using strings as array items */
 		item = zend_hash_get_current_data(Z_ARRVAL_P(options));
-		if (Z_TYPE_P(item) != IS_STRING) convert_to_string(item);
-		smart_string_appendl(&option, Z_STRVAL_P(item), Z_STRLEN_P(item));
+		item_str = zval_try_get_string(item);
+		if (!item_str) {
+			smart_string_free(&option);
+			result->count = args_counter;
+			rrd_args_free(result);
+			return NULL;
+		}
+		smart_string_appendl(&option, ZSTR_VAL(item_str), ZSTR_LEN(item_str));
 		smart_string_0(&option);
+		zend_string_release(item_str);
 
 		result->args[args_counter++] = estrdup(option.c);
 		smart_string_free(&option);
