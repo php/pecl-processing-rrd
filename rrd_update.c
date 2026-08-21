@@ -44,7 +44,7 @@ typedef struct _rrd_update_object {
  * fetch our custom object from user space object
  */
 static inline rrd_update_object *php_rrd_update_fetch_object(zend_object *obj) {
-	return (rrd_update_object *)((char*)(obj) - XtOffsetOf(rrd_update_object, std));
+	return (rrd_update_object *)((char*)(obj) - offsetof(rrd_update_object, std));
 } 
 
 /* {{{ rrd_update_object_dtor
@@ -179,7 +179,7 @@ PHP_METHOD(RRDUpdater, update)
 	update_argv = rrd_args_init_by_phparray("update", intern_obj->file_path, &zv_update_argv);
 	if (!update_argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
-		zval_dtor(&zv_update_argv);
+		zval_ptr_dtor_nogc(&zv_update_argv);
 		if (time_str_length == 0) efree(time);
 		RETURN_FALSE;
 	}
@@ -188,7 +188,7 @@ PHP_METHOD(RRDUpdater, update)
 
 	/* call rrd_update and test if fails */
 	if (rrd_update(update_argv->count - 1, &update_argv->args[1]) == -1) {
-		zval_dtor(&zv_update_argv);
+		zval_ptr_dtor_nogc(&zv_update_argv);
 		rrd_args_free(update_argv);
 
 		/* throw exception with rrd error string */
@@ -197,7 +197,7 @@ PHP_METHOD(RRDUpdater, update)
 		return;
 	}
 
-	zval_dtor(&zv_update_argv);
+	zval_ptr_dtor_nogc(&zv_update_argv);
 	rrd_args_free(update_argv);
 
 	RETURN_TRUE;
@@ -265,6 +265,6 @@ void rrd_update_minit()
 
 	memcpy(&rrd_update_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	rrd_update_handlers.clone_obj = NULL;
-	rrd_update_handlers.offset = XtOffsetOf(rrd_update_object, std);
+	rrd_update_handlers.offset = offsetof(rrd_update_object, std);
 	rrd_update_handlers.free_obj = rrd_update_object_dtor;
 }
