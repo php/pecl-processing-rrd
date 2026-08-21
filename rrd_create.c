@@ -135,6 +135,20 @@ PHP_METHOD(RRDCreator, __construct)
 	if (intern_obj->start_time) efree(intern_obj->start_time);
 	intern_obj->start_time = NULL;
 
+	/* a second __construct otherwise inherits the previous step and sources */
+	if (!Z_ISUNDEF(intern_obj->zv_step)) {
+		zval_dtor(&intern_obj->zv_step);
+		ZVAL_UNDEF(&intern_obj->zv_step);
+	}
+	if (!Z_ISUNDEF(intern_obj->zv_arr_data_sources)) {
+		zval_dtor(&intern_obj->zv_arr_data_sources);
+		ZVAL_UNDEF(&intern_obj->zv_arr_data_sources);
+	}
+	if (!Z_ISUNDEF(intern_obj->zv_arr_archives)) {
+		zval_dtor(&intern_obj->zv_arr_archives);
+		ZVAL_UNDEF(&intern_obj->zv_arr_archives);
+	}
+
 	intern_obj->file_path = estrdup(path);
 	if (start_time) intern_obj->start_time = estrndup(ZSTR_VAL(start_time), ZSTR_LEN(start_time));
 	if (step) {
