@@ -341,7 +341,7 @@ PHP_FUNCTION(rrd_restore)
 	argv = rrd_args_init_by_phparray("restore", xml_filename, &zv_options);
 	if (!argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
-		zval_dtor(&zv_options);
+		zval_ptr_dtor_nogc(&zv_options);
 		RETURN_FALSE;
 	}
 
@@ -353,7 +353,7 @@ PHP_FUNCTION(rrd_restore)
 	} else {
 		RETVAL_TRUE;
 	}
-	zval_dtor(&zv_options);
+	zval_ptr_dtor_nogc(&zv_options);
 	rrd_args_free(argv);
 }
 /* }}} */
