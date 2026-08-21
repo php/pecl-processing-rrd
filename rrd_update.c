@@ -121,6 +121,11 @@ PHP_METHOD(RRDUpdater, update)
 	int argc = ZEND_NUM_ARGS();
 	zend_string *zs_ds_name, *zs_ds_val;
 	zval *zv_ds_val;
+	HashTable *values_ht;
+	/* __construct is callable again, so a __toString below could repoint the
+	 * object after the open_basedir check; work from a snapshot instead
+	 */
+	char *checked_path;
 
 	/* string for all data source names formated for rrd_update call */
 	smart_string ds_names = {0};
@@ -146,16 +151,24 @@ PHP_METHOD(RRDUpdater, update)
 	if (php_check_open_basedir(intern_obj->file_path)) {
 		RETURN_FALSE;
 	}
+	checked_path = estrdup(intern_obj->file_path);
 
 	if (argc > 1 && time_str_length == 0) {
+		efree(checked_path);
 		zend_throw_exception(NULL, "time cannot be empty string", 0);
 		return;
 	}
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zv_values_array), zs_ds_name, zv_ds_val) {
+	/* converting a value runs __toString, which must not free this array */
+	values_ht = Z_ARRVAL_P(zv_values_array);
+	GC_ADDREF(values_ht);
+
+	ZEND_HASH_FOREACH_STR_KEY_VAL(values_ht, zs_ds_name, zv_ds_val) {
 		if (!zs_ds_name) {
 			smart_string_free(&ds_names);
 			smart_string_free(&ds_vals);
+			zend_array_release(values_ht);
+			efree(checked_path);
 			zend_throw_exception(NULL,
 				"values array must be keyed by data source name", 0);
 			return;
@@ -178,11 +191,16 @@ PHP_METHOD(RRDUpdater, update)
 		if (!zs_ds_val) {
 			smart_string_free(&ds_names);
 			smart_string_free(&ds_vals);
+			zend_array_release(values_ht);
+			efree(checked_path);
 			return;
 		}
 		smart_string_appendl(&ds_vals, ZSTR_VAL(zs_ds_val), ZSTR_LEN(zs_ds_val));
 		zend_string_release(zs_ds_val);
 	} ZEND_HASH_FOREACH_END();
+
+	zend_array_release(values_ht);
+
 	smart_string_0(&ds_names);
 	smart_string_0(&ds_vals);
 
@@ -195,7 +213,8 @@ PHP_METHOD(RRDUpdater, update)
 	smart_string_free(&ds_names);
 	smart_string_free(&ds_vals);
 
-	update_argv = rrd_args_init_by_phparray("update", intern_obj->file_path, &zv_update_argv);
+	update_argv = rrd_args_init_by_phparray("update", checked_path, &zv_update_argv);
+	efree(checked_path);
 	if (!update_argv) {
 		zend_error(E_WARNING, "cannot allocate arguments options");
 		zval_dtor(&zv_update_argv);
