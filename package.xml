@@ -65,6 +65,21 @@
      <file role="test" name="rrd_020.phpt" />
      <file role="test" name="rrd_021.phpt" />
      <file role="test" name="rrd_022.phpt" />
+     <file role="test" name="rrd_023.phpt" />
+     <file role="test" name="rrd_024.phpt" />
+     <file role="test" name="rrd_025.phpt" />
+     <file role="test" name="rrd_026.phpt" />
+     <file role="test" name="rrd_027.phpt" />
+     <file role="test" name="rrd_028.phpt" />
+     <file role="test" name="rrd_029.phpt" />
+     <file role="test" name="rrd_030.phpt" />
+     <file role="test" name="rrd_031.phpt" />
+     <file role="test" name="rrd_032.phpt" />
+     <file role="test" name="rrd_033.phpt" />
+     <file role="test" name="rrd_034.phpt" />
+     <file role="test" name="rrd_035.phpt" />
+     <file role="test" name="rrd_036.phpt" />
+     <file role="test" name="rrd_037.phpt" />
      <file role="test" name="rrdtool-bin.inc.in" />
      <file role="test" name="skipif.inc" />
      <dir name="data">

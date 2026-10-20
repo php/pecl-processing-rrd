@@ -13,10 +13,16 @@ jobs:
   build:
     name: PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental || false }}
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.1', '8.2', '8.3', '8.4', '8.5']
+        php: ['7.0', '7.4', '8.1', '8.2', '8.3', '8.4', '8.5']
+        include:
+          # PHP 8.6 is still a prerelease; unrelated upstream failures
+          # must not gate pull requests.
+          - php: '8.6'
+            experimental: true
 
     steps:
       - name: Checkout
@@ -25,12 +31,15 @@ jobs:
       - name: Install librrd
         run: |
           sudo apt-get update
-          sudo apt-get install -y librrd-dev pkg-config
+          sudo apt-get install -y librrd-dev pkg-config rrdtool
 
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
         with:
           php-version: ${{ matrix.php }}
+          # PHP 7.0's runner copies $_ENV to child processes, including HOME
+          # for Fontconfig's writable user cache.
+          ini-values: variables_order=EGPCS
           tools: none
           coverage: none
 
@@ -39,6 +48,9 @@ jobs:
           phpize
           ./configure --with-rrd
           make -j"$(nproc)"
+
+      - name: Generate test fixtures
+        run: make -C tests/data all
 
       - name: Test
         run: make test
