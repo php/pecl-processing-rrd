@@ -5,14 +5,13 @@ PHP_ARG_WITH(rrd, for rrdtool support,
 [  --with-rrd              Include rrdtool support (requires rrdtool >= 1.3.0)], yes)
 
 AC_ARG_WITH(rrd-binary,
-[AC_HELP_STRING([--with-rrd-binary][=PATH], [rrd binary dir path, mostly for testing (default=$PATH)])],
+[AS_HELP_STRING([--with-rrd-binary@<:@=PATH@:>@], [rrd binary dir path, mostly for testing (default=$PATH)])],
 [AC_PATH_PROG(RRDTOOL_BIN, rrdtool, no, $withval)],
 [AC_PATH_PROG(RRDTOOL_BIN, rrdtool, no, $PATH)])
 
 AC_SUBST(RRDTOOL_BIN)
 if test -f $srcdir/tests/rrdtool-bin.inc.in; then
-  AC_OUTPUT(tests/rrdtool-bin.inc)
-  AC_OUTPUT(tests/data/Makefile)
+  AC_CONFIG_FILES([tests/rrdtool-bin.inc tests/data/Makefile])
 fi
 
 if test "$PHP_RRD" != "no"; then
@@ -29,6 +28,20 @@ if test "$PHP_RRD" != "no"; then
   else
     AC_MSG_ERROR(pkgconfig and librrd in version >= 1.3.0 must be installed)
   fi
+
+  dnl librrd took char ** for argv before 1.9 and const char ** from 1.9 on
+  AC_MSG_CHECKING(whether librrd takes const char ** argv)
+  rrd_save_CFLAGS="$CFLAGS"
+  CFLAGS="$CFLAGS $LIBRRD_CFLAGS -Werror"
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+    [[#include <rrd.h>]],
+    [[const char *argv[2] = { "create", 0 }; rrd_create(1, argv);]])],
+    [
+      AC_MSG_RESULT(yes)
+      AC_DEFINE(HAVE_RRD_CONST_ARGV, 1, [librrd takes const char ** argv])
+    ],
+    [AC_MSG_RESULT(no)])
+  CFLAGS="$rrd_save_CFLAGS"
 
   dnl rrd_lastupdate_r available in 1.4.0+
   AC_CHECK_LIB([rrd], [rrd_lastupdate_r],

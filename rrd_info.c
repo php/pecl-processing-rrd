@@ -29,7 +29,7 @@ PHP_FUNCTION(rrd_info)
 	/* list of arguments for rrd_info call, it's more efficient then u
 	 * usage of rrd_args, because there isn't array of arguments in parameters
 	 */
-	char *argv[3];
+	char *argv[2];
 	/* return value from rrd_info_r() */
 	rrd_info_t *rrd_info_data;
 
@@ -40,13 +40,12 @@ PHP_FUNCTION(rrd_info)
 
 	if (php_check_open_basedir(filename)) RETURN_FALSE;
 
-	argv[0] = "dummy";
-	argv[1] = estrdup("info");
-	argv[2] = estrndup(filename, filename_length);
+	argv[0] = estrdup("info");
+	argv[1] = estrndup(filename, filename_length);
 
-	rrd_info_data = rrd_info(2, &argv[1]);
+	rrd_info_data = rrd_info(2, RRD_ARGV(argv));
 
-	efree(argv[2]); efree(argv[1]);
+	efree(argv[1]); efree(argv[0]);
 
 	if (!rrd_info_data) RETURN_FALSE;
 
